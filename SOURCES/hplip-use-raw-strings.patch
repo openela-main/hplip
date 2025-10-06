@@ -1,0 +1,398 @@
+diff --git a/base/LedmWifi.py b/base/LedmWifi.py
+index f63a050..074d5a2 100644
+--- a/base/LedmWifi.py
++++ b/base/LedmWifi.py
+@@ -31,7 +31,7 @@ from .g import *
+ from . import device, utils
+ from .sixext import to_bytes_utf8
+ 
+-http_result_pat = re.compile("""HTTP/\d.\d\s(\d+)""", re.I)
++http_result_pat = re.compile(r"""HTTP/\d.\d\s(\d+)""", re.I)
+ HTTP_OK = 200
+ HTTP_ACCEPTED = 202
+ HTTP_NOCONTENT = 204
+diff --git a/base/device.py b/base/device.py
+index fbe6c34..a551403 100644
+--- a/base/device.py
++++ b/base/device.py
+@@ -47,7 +47,7 @@ from . import models, mdns, slp, avahi
+ from .strings import *
+ from .sixext import PY3, to_bytes_utf8, to_unicode, to_string_latin, to_string_utf8, xStringIO
+ 
+-http_result_pat = re.compile("""HTTP/\d.\d\s(\d+)""", re.I)
++http_result_pat = re.compile(r"""HTTP/\d.\d\s(\d+)""", re.I)
+ 
+ HTTP_OK = 200
+ HTTP_ERROR = 500
+diff --git a/base/g.py b/base/g.py
+index 96b3131..023aeea 100644
+--- a/base/g.py
++++ b/base/g.py
+@@ -302,7 +302,7 @@ prop.hpcups_build = to_bool(sys_conf.get('configure', 'hpcups-install', '0'))
+ prop.hpijs_build = to_bool(sys_conf.get('configure', 'hpijs-install', '0'))
+ 
+ # Spinner, ala Gentoo Portage
+-spinner = "\|/-\|/-"
++spinner = r"\|/-\|/-"
+ spinpos = 0
+ enable_spinner = True
+ 
+@@ -352,7 +352,7 @@ def check_extension_module_env(ext_mod):
+         log.error('%s not present in the system. Please re-install HPLIP.' %ext_mod)
+         sys.exit(1)
+ 
+-    m = re.search('python(\d(\.\d){0,2})', ext_path)            #get the python version where the .so file is found
++    m = re.search(r'python(\d(\.\d){0,2})', ext_path)            #get the python version where the .so file is found
+     ext_ver = xint(m.group(1))
+ 
+     if ext_ver[0] == 3:
+diff --git a/base/logger.py b/base/logger.py
+index dd92a9c..68e4f13 100644
+--- a/base/logger.py
++++ b/base/logger.py
+@@ -437,10 +437,10 @@ class Logger(object):
+                 start = start + " "
+                 number_chars = number_chars + 1
+             try:
+-                elem_start = re.findall("(\<\W{0,1}\w+) ?", line)[0]
+-                elem_finished = re.findall("([?|\]\]]*\>)", line)[0]
++                elem_start = re.findall(r"(\<\W{0,1}\w+) ?", line)[0]
++                elem_finished = re.findall(r"([?|\]\]]*\>)", line)[0]
+                 #should not have *
+-                attrs = re.findall("(\S*?\=\".*?\")", line)
++                attrs = re.findall(r"(\S*?\=\".*?\")", line)
+                 #output.write(start + elem_start)
+                 self.log(start+elem_start, level, False)
+                 number_chars = len(start + elem_start)
+diff --git a/base/models.py b/base/models.py
+index dc6cc39..48dd2ef 100644
+--- a/base/models.py
++++ b/base/models.py
+@@ -35,7 +35,7 @@ except ImportError:
+     datetime = None
+ 
+ 
+-pat_prod_num = re.compile("""(\d+)""", re.I)
++pat_prod_num = re.compile(r"""(\d+)""", re.I)
+ 
+ TYPE_UNKNOWN = 0
+ TYPE_STRING = 1
+@@ -427,25 +427,25 @@ class ModelData:
+             }
+ 
+         self.RE_FIELD_TYPES = {
+-            re.compile('^r(\d+)-agent(\d+)-kind', re.IGNORECASE) : TYPE_INT,
+-            re.compile('^r(\d+)-agent(\d+)-type', re.IGNORECASE) : TYPE_INT,
+-            re.compile('^r(\d+)-agent(\d+)-sku', re.IGNORECASE) : TYPE_STR,
+-            re.compile('^agent(\d+)-desc', re.IGNORECASE) : TYPE_STR,
+-            re.compile('^agent(\d+)-virgin', re.IGNORECASE) : TYPE_BOOL,
+-            re.compile('^agent(\d+)-dvc', re.IGNORECASE) : TYPE_INT,
+-            re.compile('^agent(\d+)-kind', re.IGNORECASE) : TYPE_INT,
+-            re.compile('^agent(\d+)-type', re.IGNORECASE) : TYPE_INT,
+-            re.compile('^agent(\d+)-id', re.IGNORECASE) : TYPE_INT,
+-            re.compile('^agent(\d+)-hp-ink', re.IGNORECASE) : TYPE_BOOL,
+-            re.compile('^agent(\d+)-health-desc', re.IGNORECASE) : TYPE_STR,
+-            re.compile('^agent(\d+)-health$', re.IGNORECASE) : TYPE_INT,
+-            re.compile('^agent(\d+)-known', re.IGNORECASE) : TYPE_BOOL,
+-            re.compile('^agent(\d+)-level', re.IGNORECASE) : TYPE_INT,
+-            re.compile('^agent(\d+)-ack', re.IGNORECASE) : TYPE_BOOL,
+-            re.compile('^agent(\d+)-sku', re.IGNORECASE) : TYPE_STR,
+-            re.compile('^in-tray(\d+)', re.IGNORECASE) : TYPE_BOOL,
+-            re.compile('^out-tray(\d+)', re.IGNORECASE) : TYPE_BOOL,
+-            re.compile('^model(\d+)', re.IGNORECASE) : TYPE_STR,
++            re.compile(r'^r(\d+)-agent(\d+)-kind', re.IGNORECASE) : TYPE_INT,
++            re.compile(r'^r(\d+)-agent(\d+)-type', re.IGNORECASE) : TYPE_INT,
++            re.compile(r'^r(\d+)-agent(\d+)-sku', re.IGNORECASE) : TYPE_STR,
++            re.compile(r'^agent(\d+)-desc', re.IGNORECASE) : TYPE_STR,
++            re.compile(r'^agent(\d+)-virgin', re.IGNORECASE) : TYPE_BOOL,
++            re.compile(r'^agent(\d+)-dvc', re.IGNORECASE) : TYPE_INT,
++            re.compile(r'^agent(\d+)-kind', re.IGNORECASE) : TYPE_INT,
++            re.compile(r'^agent(\d+)-type', re.IGNORECASE) : TYPE_INT,
++            re.compile(r'^agent(\d+)-id', re.IGNORECASE) : TYPE_INT,
++            re.compile(r'^agent(\d+)-hp-ink', re.IGNORECASE) : TYPE_BOOL,
++            re.compile(r'^agent(\d+)-health-desc', re.IGNORECASE) : TYPE_STR,
++            re.compile(r'^agent(\d+)-health$', re.IGNORECASE) : TYPE_INT,
++            re.compile(r'^agent(\d+)-known', re.IGNORECASE) : TYPE_BOOL,
++            re.compile(r'^agent(\d+)-level', re.IGNORECASE) : TYPE_INT,
++            re.compile(r'^agent(\d+)-ack', re.IGNORECASE) : TYPE_BOOL,
++            re.compile(r'^agent(\d+)-sku', re.IGNORECASE) : TYPE_STR,
++            re.compile(r'^in-tray(\d+)', re.IGNORECASE) : TYPE_BOOL,
++            re.compile(r'^out-tray(\d+)', re.IGNORECASE) : TYPE_BOOL,
++            re.compile(r'^model(\d+)', re.IGNORECASE) : TYPE_STR,
+             }
+ 
+         self.TYPE_CACHE = {}
+diff --git a/base/password.py b/base/password.py
+index 259bf82..a4ed107 100644
+--- a/base/password.py
++++ b/base/password.py
+@@ -167,8 +167,8 @@ class Password(object):
+ 
+                     elif i == 1:  # TIMEOUT
+                         if('true' in cmd and self.__password_prompt_str == ""):  # sudo true or su -c "true"
+-                            cb = cb.replace("[", "\[")
+-                            cb = cb.replace("]", "\]")
++                            cb = cb.replace("[", r"\[")
++                            cb = cb.replace("]", r"\]")
+ 
+                             self.__password_prompt_str = cb
+                             try:
+diff --git a/base/queues.py b/base/queues.py
+index 0818574..8625f53 100755
+--- a/base/queues.py
++++ b/base/queues.py
+@@ -46,7 +46,7 @@ HPPS = 3
+ HPOTHER = 4
+ 
+ DEVICE_URI_PATTERN = re.compile(r"""(.*):/(.*?)/(\S*?)\?(?:serial=(\S*)|device=(\S*)|ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}[^&]*)|zc=(\S+))(?:&port=(\d))?""", re.I)
+-NICKNAME_PATTERN = re.compile(b'''\*NickName:\s*\"(.*)"''', re.MULTILINE)
++NICKNAME_PATTERN = re.compile(r'''\*NickName:\s*\"(.*)"''', re.MULTILINE)
+ NET_PATTERN = re.compile(r"""(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})""")
+ NET_ZC_PATTERN = re.compile(r'''zc=(.*)''',re.IGNORECASE)
+ NET_OTHER_PATTERN = re.compile(r'''(.*)://(.*)''',re.IGNORECASE)
+@@ -149,7 +149,7 @@ def parseQueues(mode):
+                 desc=''
+             else:
+                 try:
+-                    desc = to_string_utf8( NICKNAME_PATTERN.search(fileptr).group(1) )
++                    desc = to_string_utf8( NICKNAME_PATTERN.search(fileptr.decode('utf-8')).group(1) )
+                 except AttributeError:
+                     desc = ''
+ 
+diff --git a/base/status.py b/base/status.py
+index 37c774e..01f455d 100644
+--- a/base/status.py
++++ b/base/status.py
+@@ -1341,7 +1341,7 @@ def MapPJLErrorCode(error_code, str_code=None):
+     return status_code
+ 
+ 
+-pjl_code_pat = re.compile("""^CODE\s*=\s*(\d.*)$""", re.IGNORECASE)
++pjl_code_pat = re.compile(r"""^CODE\s*=\s*(\d.*)$""", re.IGNORECASE)
+ 
+ 
+ 
+diff --git a/base/tui.py b/base/tui.py
+index 0f90f92..3b36c65 100644
+--- a/base/tui.py
++++ b/base/tui.py
+@@ -217,7 +217,7 @@ class ProgressMeter(object):
+         self.progress = 0
+         self.prompt = prompt
+         self.prev_length = 0
+-        self.spinner = "\|/-\|/-*"
++        self.spinner = r"\|/-\|/-*"
+         self.spinner_pos = 0
+         self.max_size = ttysize()[1] - len(prompt) - 25
+         self.update(0)
+diff --git a/base/utils.py b/base/utils.py
+index 2b631ce..2fb57c4 100644
+--- a/base/utils.py
++++ b/base/utils.py
+@@ -148,7 +148,7 @@ def get_cups_systemgroup_list():
+             return lis
+ 
+     try:
+-        lis = ((re.findall('SystemGroup [\w* ]*',fp.read()))[0].replace('SystemGroup ','')).split(' ')
++        lis = ((re.findall(r'SystemGroup [\w* ]*',fp.read()))[0].replace('SystemGroup ','')).split(' ')
+     except IndexError:
+         return lis
+ 
+@@ -1597,7 +1597,7 @@ def mixin(cls):
+  # ------------------------- Usage Help
+ USAGE_OPTIONS = ("[OPTIONS]", "", "heading", False)
+ USAGE_LOGGING1 = ("Set the logging level:", "-l<level> or --logging=<level>", 'option', False)
+-USAGE_LOGGING2 = ("", "<level>: none, info\*, error, warn, debug (\*default)", "option", False)
++USAGE_LOGGING2 = ("", r"<level>: none, info\*, error, warn, debug (\*default)", "option", False)
+ USAGE_LOGGING3 = ("Run in debug mode:", "-g (same as option: -ldebug)", "option", False)
+ USAGE_LOGGING_PLAIN = ("Output plain text only:", "-t", "option", False)
+ USAGE_ARGS = ("[PRINTER|DEVICE-URI]", "", "heading", False)
+@@ -1605,13 +1605,13 @@ USAGE_ARGS2 = ("[PRINTER]", "", "heading", False)
+ USAGE_DEVICE = ("To specify a device-URI:", "-d<device-uri> or --device=<device-uri>", "option", False)
+ USAGE_PRINTER = ("To specify a CUPS printer:", "-p<printer> or --printer=<printer>", "option", False)
+ USAGE_BUS1 = ("Bus to probe (if device not specified):", "-b<bus> or --bus=<bus>", "option", False)
+-USAGE_BUS2 = ("", "<bus>: cups\*, usb\*, net, bt, fw, par\* (\*defaults) (Note: bt and fw not supported in this release.)", 'option', False)
++USAGE_BUS2 = ("", r"<bus>: cups\*, usb\*, net, bt, fw, par\* (\*defaults) (Note: bt and fw not supported in this release.)", 'option', False)
+ USAGE_HELP = ("This help information:", "-h or --help", "option", True)
+ USAGE_SPACE = ("", "", "space", False)
+ USAGE_EXAMPLES = ("Examples:", "", "heading", False)
+ USAGE_NOTES = ("Notes:", "", "heading", False)
+ USAGE_STD_NOTES1 = ("If device or printer is not specified, the local device bus is probed and the program enters interactive mode.", "", "note", False)
+-USAGE_STD_NOTES2 = ("If -p\* is specified, the default CUPS printer will be used.", "", "note", False)
++USAGE_STD_NOTES2 = (r"If -p\* is specified, the default CUPS printer will be used.", "", "note", False)
+ USAGE_SEEALSO = ("See Also:", "", "heading", False)
+ USAGE_LANGUAGE = ("Set the language:", "--loc=<lang> or --lang=<lang>. Use --loc=? or --lang=? to see a list of available language codes.", "option", False)
+ USAGE_LANGUAGE2 = ("Set the language:", "--lang=<lang>. Use --lang=? to see a list of available language codes.", "option", False)
+@@ -1839,7 +1839,7 @@ encoding: utf8
+ 
+     elif typ == 'man':
+         log.info('.TH "%s" 1 "%s" Linux "User Manuals"' % (crumb, version))
+-        log.info(".SH NAME\n%s \- %s" % (crumb, title))
++        log.info(r".SH NAME\n%s \- %s" % (crumb, title))
+ 
+         for line in text_list:
+             text1, text2, format, trailing_space = line
+@@ -1938,7 +1938,7 @@ def unescape(text):
+             except KeyError:
+                 pass
+         return text # leave as is
+-    return re.sub("&#?\w+;", fixup, text)
++    return re.sub(r"&#?\w+;", fixup, text)
+ 
+ 
+ # Adds HTML or XML character references and entities from a text string
+@@ -1991,7 +1991,7 @@ def Is_HPLIP_older_version(installed_version, available_version):
+     log.debug("HPLIP Installed_version=%s  Available_version=%s"%(installed_version,available_version))
+     cnt = 0
+     Is_older = False
+-    pat=re.compile('''(\d{1,})([a-z]{1,})''')
++    pat=re.compile(r'''(\d{1,})([a-z]{1,})''')
+     try:
+         while cnt <len(installed_array) and cnt <len(available_array):
+ 
+diff --git a/check.py b/check.py
+index 284b88e..86ca832 100755
+--- a/check.py
++++ b/check.py
+@@ -627,7 +627,7 @@ class DependenciesCheck(object):
+                     status, output = utils.run("%s -d03f0:" % lsusb)
+ 
+                     if output:
+-                        lsusb_pat = re.compile("""^Bus\s([0-9a-fA-F]{3,3})\sDevice\s([0-9a-fA-F]{3,3}):\sID\s([0-9a-fA-F]{4,4}):([0-9a-fA-F]{4,4})(.*)""", re.IGNORECASE)
++                        lsusb_pat = re.compile(r"""^Bus\s([0-9a-fA-F]{3,3})\sDevice\s([0-9a-fA-F]{3,3}):\sID\s([0-9a-fA-F]{4,4}):([0-9a-fA-F]{4,4})(.*)""", re.IGNORECASE)
+                         log.debug(output)
+                         try:
+                             hpmudext = utils.import_ext('hpmudext')
+@@ -682,7 +682,7 @@ class DependenciesCheck(object):
+ 
+                                         out =''
+                                         for g in getfacl_out_list:
+-                                            if 'getfacl' not in g and '' is not g and 'file' not in g:
++                                            if 'getfacl' not in g and '' != g and 'file' not in g:
+                                                 pat = re.compile('''.*:(.*)''')
+                                                 if pat.search(g):
+                                                     out = out +' '+ pat.search(g).group(1)
+diff --git a/fax/soapfax.py b/fax/soapfax.py
+index 9865726..344cb34 100644
+--- a/fax/soapfax.py
++++ b/fax/soapfax.py
+@@ -42,7 +42,7 @@ from base.sixext import to_bytes_utf8
+ 
+ # **************************************************************************** #
+ 
+-http_result_pat = re.compile("""HTTP/\d.\d\s(\d+)""", re.I)
++http_result_pat = re.compile(r"""HTTP/\d.\d\s(\d+)""", re.I)
+ 
+ 
+ TIME_FORMAT_AM_PM = 1
+diff --git a/installer/dcheck.py b/installer/dcheck.py
+index a1a4f02..4dbee59 100644
+--- a/installer/dcheck.py
++++ b/installer/dcheck.py
+@@ -33,8 +33,8 @@ from base.g import *
+ from base import utils, services
+ from base.sixext import to_bytes_utf8
+ 
+-ver1_pat = re.compile("""(\d+\.\d+\.\d+)""", re.IGNORECASE)
+-ver_pat = re.compile("""(\d+.\d+)""", re.IGNORECASE)
++ver1_pat = re.compile(r"""(\d+\.\d+\.\d+)""", re.IGNORECASE)
++ver_pat = re.compile(r"""(\d+.\d+)""", re.IGNORECASE)
+ PID = 0
+ CMDLINE = 1
+ 
+@@ -358,7 +358,7 @@ def get_xsane_version():
+         
+ 
+     if output:
+-        xsane_ver_pat =re.compile('''xsane-(\d{1,}\.\d{1,}).*''')
++        xsane_ver_pat =re.compile(r'''xsane-(\d{1,}\.\d{1,}).*''')
+         xsane_ver_info = output.splitlines()[0]
+         if xsane_ver_pat.search(xsane_ver_info):
+             installed_ver = xsane_ver_pat.search(xsane_ver_info).group(1)
+diff --git a/makeuri.py b/makeuri.py
+index 4a10de8..6343e31 100755
+--- a/makeuri.py
++++ b/makeuri.py
+@@ -46,7 +46,7 @@ USAGE = [ (__doc__, "", "name", True),
+           ("DEVNODE (parallel only):", '"/dev/parportX", X=0,1,2,...', "option", False),
+           ("SERIAL NO. (usb and parallel only):", '"serial no."', "option", True),
+           utils.USAGE_OPTIONS,
+-          ("To specify the port on a multi-port JetDirect:", "-p<port> or --port=<port> (Valid values are 1\*, 2, and 3. \*default)", "option", False),
++          ("To specify the port on a multi-port JetDirect:", r"-p<port> or --port=<port> (Valid values are 1\*, 2, and 3. \*default)", "option", False),
+           ("Show the CUPS URI only (quiet mode):", "-c or --cups", "option", False),
+           ("Show the SANE URI only (quiet mode):", "-s or --sane", "option", False),
+           ("Show the HP Fax URI only (quiet mode):", "-f or --fax", "option", False),
+diff --git a/prnt/cups.py b/prnt/cups.py
+index 1ea3099..78b8adc 100644
+--- a/prnt/cups.py
++++ b/prnt/cups.py
+@@ -168,7 +168,7 @@ CUPS_ERROR_BAD_NAME = 0x0f00
+ CUPS_ERROR_BAD_PARAMETERS = 0x0f01
+ 
+ nickname_pat = re.compile(r'''\*NickName:\s*\"(.*)"''', re.MULTILINE)
+-pat_cups_error_log = re.compile("""^loglevel\s?(debug|debug2|warn|info|error|none)""", re.I)
++pat_cups_error_log = re.compile(r"""^loglevel\s?(debug|debug2|warn|info|error|none)""", re.I)
+ ppd_pat = re.compile(r'''.*hp-(.*?)(-.*)*\.ppd.*''', re.I)
+ ppd_pat1 = re.compile(r'''.*hp-(.*?)(_.*)*\.ppd.*''', re.I)
+ 
+diff --git a/probe.py b/probe.py
+index 2041fb6..2b43ece 100755
+--- a/probe.py
++++ b/probe.py
+@@ -42,11 +42,11 @@ USAGE = [(__doc__, "", "name", True),
+          ("Usage: %s [OPTIONS]" % __mod__, "", "summary", True),
+          utils.USAGE_OPTIONS,
+          ("Bus to probe:", "-b<bus> or --bus=<bus>", "option", False),
+-         ("", "<bus>: cups, usb\*, net, bt, fw, par (\*default) (Note: bt and fw not supported in this release.)", "option", False),
++         ("", r"<bus>: cups, usb\*, net, bt, fw, par (\*default) (Note: bt and fw not supported in this release.)", "option", False),
+          ("Set Time to Live (TTL):", "-t<ttl> or --ttl=<ttl> (Default is 4).", "option", False),
+          ("Set timeout:", "-o<timeout in secs.> or --timeout=<timeout is secs.>", "option", False),
+          ("Filter by functionality:", "-e<filter list> or --filter=<filter list>", "option", False),
+-         ("", "<filter list>: comma separated list of one or more of: scan, pcard, fax, copy, or none\*. (\*none is the default)", "option", False),
++         ("", r"<filter list>: comma separated list of one or more of: scan, pcard, fax, copy, or none\*. (\*none is the default)", "option", False),
+          ("Search:", "-s<search re> or --search=<search re>", "option", False),
+          ("", "<search re> must be a valid regular expression (not case sensitive)", "option", False),
+          ("Network discovery method:", "-m<method> or --method=<method>: <method> is 'slp'* or 'mdns'.", "option", False),
+diff --git a/scan.py b/scan.py
+index 0bfa6f5..27b8c2e 100755
+--- a/scan.py
++++ b/scan.py
+@@ -249,9 +249,9 @@ try:
+     extra_options=[utils.USAGE_SPACE,
+         ("[OPTIONS] (General)", "", "header", False),
+         ("Scan destinations:", "-s<dest_list> or --dest=<dest_list>", "option", False),
+-        ("", "where <dest_list> is a comma separated list containing one or more of: 'file'\*, ", "option", False),
++        ("", r"where <dest_list> is a comma separated list containing one or more of: 'file'\*, ", "option", False),
+         ("", "'viewer', 'editor', 'pdf', or 'print'. Use only commas between values, no spaces.", "option", False),
+-        ("Scan mode:", "-m<mode> or --mode=<mode>. Where <mode> is 'gray'\*, 'color' or 'lineart'.", "option", False),
++        ("Scan mode:", r"-m<mode> or --mode=<mode>. Where <mode> is 'gray'\*, 'color' or 'lineart'.", "option", False),
+         ("Scanning resolution:", "-r<resolution_in_dpi> or --res=<resolution_in_dpi> or --resolution=<resolution_in_dpi>", "option", False),
+         ("", "where 300 is default.", "option", False),
+         ("Image resize:", "--resize=<scale_in_%> (min=1%, max=400%, default=100%)", "option", False),
+@@ -268,7 +268,7 @@ try:
+         utils.USAGE_SPACE,
+         ("[OPTIONS] (Scan area)", "", "header", False),
+         ("Specify the units for area/box measurements:", "-t<units> or --units=<units>", "option", False),
+-        ("", "where <units> is 'mm'\*, 'cm', 'in', 'px', or 'pt' ('mm' is default).", "option", False),
++        ("", r"where <units> is 'mm'\*, 'cm', 'in', 'px', or 'pt' ('mm' is default).", "option", False),
+         ("Scan area:", "-a<tlx>,<tly>,<brx>,<bry> or --area=<tlx>,<tly>,<brx>,<bry>", "option", False),
+         ("", "Coordinates are relative to the upper left corner of the scan area.", "option", False),
+         ("", "Units for tlx, tly, brx, and bry are specified by -t/--units (default is 'mm').", "option", False),
+diff --git a/setup.py b/setup.py
+index 98f57fd..1a74d6d 100755
+--- a/setup.py
++++ b/setup.py
+@@ -79,11 +79,11 @@ USAGE = [ (__doc__, "", "name", True),
+           utils.USAGE_SPACE,
+           utils.USAGE_OPTIONS,
+           ("Automatic mode:", "-a or --auto (-i mode only)", "option", False),
+-          ("To specify the port on a multi-port JetDirect:", "--port=<port> (Valid values are 1\*, 2, and 3. \*default)", "option", False),
++          ("To specify the port on a multi-port JetDirect:", r"--port=<port> (Valid values are 1\*, 2, and 3. \*default)", "option", False),
+           ("No testpage in automatic mode:", "-x (-i mode only)", "option", False),
+           ("To specify a CUPS printer queue name:", "-p<printer> or --printer=<printer> (-i mode only)", "option", False),
+           ("To specify a CUPS fax queue name:", "-f<fax> or --fax=<fax> (-i mode only)", "option", False),
+-          ("Type of queue(s) to install:", "-t<typelist> or --type=<typelist>. <typelist>: print*, fax\* (\*default) (-i mode only)", "option", False),
++          ("Type of queue(s) to install:", r"-t<typelist> or --type=<typelist>. <typelist>: print*, fax\* (\*default) (-i mode only)", "option", False),
+           ("To specify the device URI to install:", "-d<device> or --device=<device> (--qt4 mode only)", "option", False),
+           ("Remove printers or faxes instead of setting-up:", "-r or --rm or --remove", "option", False),
+           utils.USAGE_LANGUAGE,
