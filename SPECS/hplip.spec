@@ -7,7 +7,7 @@
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.23.12
-Release: 8%{?dist}
+Release: 10%{?dist}
 # most files (base/*, *, ui*/...) - GPL2+
 # prnt/hpijs/ jpeg related files - IJG
 # prnt/* - BSD-3-Clause-HP - it is modified a little, asked here https://gitlab.com/fedora/legal/fedora-license-data/-/issues/267
@@ -962,6 +962,15 @@ find doc/images -type f -exec chmod 644 {} \;
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Fri Jul 11 2025 Petr Dancak <pdancak@redhat.com> - 3.23.12-10
+- RHEL-102977 rpm -q --changelog hplip no longer lists changelog
+
+* Tue Jun 17 2025 Petr Dancak <pdancak@redhat.com> - 3.23.12-9
+- enable following links with curl in all use cases
+  Resolves: RHEL-84817
+- hp-plugin-download wrongly parsed file type
+  Resolves: RHEL-97437
+
 * Tue Oct 29 2024 Troy Dawson <tdawson@redhat.com> - 3.23.12-8
 - Bump release for October 2024 mass rebuild:
   Resolves: RHEL-64018

@@ -32,7 +32,7 @@ index 56683fb..031ceec 100755
 -                    cmd = "%s --cache=off -P %s %s" % (wget,self.__plugin_path,src)
 +                curl = utils.which("curl", True)
 +                if curl:
-+                    cmd = "%s --create-dirs -O --output-dir %s %s" % (curl,self.__plugin_path,src)
++                    cmd = "%s --create-dirs -O --output-dir %s --location %s" % (curl,self.__plugin_path,src)
                      log.debug(cmd)
                      status, output = utils.run(cmd)
 -                    log.debug("wget returned: %d" % status)
@@ -43,7 +43,7 @@ index 56683fb..031ceec 100755
                      src = os.path.join(PLUGIN_FALLBACK_LOCATION, self.__plugin_name)
                      log.info("Plugin is not accessible. Trying to download it from fallback location: [%s]" % src)
 -                    cmd = "%s --cache=off -P %s %s" % (wget,self.__plugin_path,src)
-+                    cmd = "%s --create-dirs -O --output-dir %s %s" % (curl,self.__plugin_path,src)
++                    cmd = "%s --create-dirs -O --output-dir %s --location %s" % (curl,self.__plugin_path,src)
                      log.debug(cmd)
                      status, output = utils.run(cmd)
  
@@ -52,7 +52,7 @@ index 56683fb..031ceec 100755
                  status, filename = utils.download_from_network(digsig_url, digsig_file, True)
              else:
 -                cmd = "%s --cache=off -P %s %s" % (wget,self.__plugin_path,digsig_url)
-+                cmd = "%s --create-dirs -O --output-dir %s %s" % (curl, self.__plugin_path,digsig_url)
++                cmd = "%s --create-dirs -O --output-dir %s --location %s" % (curl, self.__plugin_path,digsig_url)
                  log.debug(cmd)
                  status, output = utils.run(cmd)
          except IOError as e:

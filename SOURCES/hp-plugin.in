@@ -16,7 +16,7 @@ download()
 {
   SOURCE="$1"
 
-  @bindir@/curl --create-dirs -O  --output-dir ~/.hplip ${SOURCE}
+  @bindir@/curl --create-dirs -O  --output-dir ~/.hplip --location ${SOURCE}
 }
 
 # link to the plugin
@@ -34,13 +34,13 @@ for link in ${PLUGIN_SOURCE} ${FALLBACK_SOURCE}
 do
   download ${link}
 
-  if test "x$(file --mime ~/.hplip/${PLUGIN_FILE} | grep 'text/x-shellscript')" = "xtext/x-shellscript"
+  if test "x$(file --mime ~/.hplip/${PLUGIN_FILE} | grep -o 'text/x-shellscript')" = "xtext/x-shellscript"
   then
     break
   fi
 done
 
-if test "x$(file --mime ~/.hplip/${PLUGIN_FILE} | grep 'text/x-shellscript')" = "x"
+if test "x$(file --mime ~/.hplip/${PLUGIN_FILE} | grep -o 'text/x-shellscript')" = "x"
 then
   @bindir@/echo "The downloaded file does not exist or is not a shell script - error during downloading, exiting..."
   exit 1
