@@ -7,7 +7,7 @@
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.23.12
-Release: 10%{?dist}
+Release: 10%{?dist}.4
 # most files (base/*, *, ui*/...) - GPL2+
 # prnt/hpijs/ jpeg related files - IJG
 # prnt/* - BSD-3-Clause-HP - it is modified a little, asked here https://gitlab.com/fedora/legal/fedora-license-data/-/issues/267
@@ -238,6 +238,15 @@ Patch70: hplip-use-raw-strings.patch
 # FTBFS GCC 14
 # https://bugs.launchpad.net/hplip/+bug/2048780
 Patch71: hplip-hpaio-gcc14.patch
+# CVE-2026-8632 - Privilege escalation and arbitrary code execution
+# via operating system command injection in Is_Process_Running()
+# https://redhat.atlassian.net/browse/RHEL-178352
+Patch72: hplip-CVE-2026-8632.patch
+# CVE-2026-8631 hplip: HPLIP: Arbitrary code execution and privilege escalation via integer overflow in hpcups
+# https://redhat.atlassian.net/browse/RHEL-178715
+Patch73: hplip-hpcups-integer-overflow.patch
+# OSH fixes after CVE-2026-8631
+Patch74: hplip-CVE-2026-8631-osh.patch
 
 %if 0%{?fedora} || 0%{?rhel} <= 8
 # mention hplip-gui if you want to have GUI
@@ -591,6 +600,12 @@ done
 # FTBFS GCC 14
 # https://bugs.launchpad.net/hplip/+bug/2048780
 %patch -P 71 -p1 -b .hpaio-gcc14
+# CVE-2026-8632 - command injection in Is_Process_Running()
+%patch -P 72 -p1 -b .CVE-2026-8632
+# CVE-2026-8631 - integer overflow in hpcups
+%patch -P 73 -p1 -b .hpcups-integer-overflow
+# OSH fixes after CVE-2026-8631
+%patch -P 74 -p1 -b .cve-2026-8631-osh
 
 # Fedora specific patches now, don't put a generic patches under it
 %if 0%{?fedora} || 0%{?rhel} <= 8
@@ -962,6 +977,20 @@ find doc/images -type f -exec chmod 644 {} \;
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Mon Jun 15 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.23.12-10.4
+- Fix more leaks in hpcups
+
+* Fri Jun 12 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.23.12-10.3
+- OSH fixes after CVE-2026-8631
+
+* Tue Jun 09 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.23.12-10.2
+- CVE-2026-8631 hplip: Arbitrary code execution and privilege escalation via
+  integer overflow in hpcups
+
+* Wed May 27 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.23.12-10.1
+- CVE-2026-8632 hplip: Privilege escalation and arbitrary code execution
+  via OS command injection in Is_Process_Running()
+
 * Fri Jul 11 2025 Petr Dancak <pdancak@redhat.com> - 3.23.12-10
 - RHEL-102977 rpm -q --changelog hplip no longer lists changelog
 
