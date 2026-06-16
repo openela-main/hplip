@@ -7,7 +7,7 @@
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.21.2
-Release: 6%{?dist}
+Release: 6%{?dist}.4
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
@@ -187,6 +187,15 @@ Patch60: hplip-fab-import.patch
 # it fails further down - break out earlier with a message
 # reported upstream as https://bugs.launchpad.net/hplip/+bug/1916114
 Patch61: hplip-hpsetup-noscanjets.patch
+# CVE-2026-8632 - Privilege escalation and arbitrary code execution
+# via operating system command injection in Is_Process_Running()
+# https://redhat.atlassian.net/browse/RHEL-178364
+Patch62: hplip-CVE-2026-8632.patch
+# CVE-2026-8631 hplip: HPLIP: Arbitrary code execution and privilege escalation via integer overflow in hpcups
+# https://redhat.atlassian.net/browse/RHEL-178724
+Patch63: hplip-CVE-2026-8631.patch
+# OSH fixes after CVE-2026-8631
+Patch64: hplip-CVE-2026-8631-osh.patch
 
 %if 0%{?fedora} || 0%{?rhel} <= 8
 # mention hplip-gui if you want to have GUI
@@ -478,6 +487,12 @@ done
 # if an user tries to install scanner via hp-setup (printer/fax utility)
 # it fails further down - break out earlier with a message
 %patch61 -p1 -b .hpsetup-noscanjets
+# CVE-2026-8632 - command injection in Is_Process_Running()
+%patch -P 62 -p1 -b .CVE-2026-8632
+# CVE-2026-8631 hplip: HPLIP: Arbitrary code execution and privilege escalation via integer overflow in hpcups
+%patch -P 63 -p1 -b .CVE-2026-8631
+# OSH fixes after CVE-2026-8631
+%patch -P 64 -p1 -b .CVE-2026-8631-osh
 
 %if 0%{?fedora} || 0%{?rhel} <= 8
 # mention hplip-gui should be installed if you want GUI
@@ -826,6 +841,20 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Mon Jun 15 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.21.2-6.4
+- Fix more leaks in hpcups
+
+* Fri Jun 12 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.21.2-6.3
+- OSH fixes after CVE-2026-8631
+
+* Wed Jun 10 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.21.2-6.2
+- CVE-2026-8631 hplip: HPLIP: Arbitrary code execution and privilege escalation
+  via integer overflow in hpcups
+
+* Wed May 27 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.21.2-6.1
+- CVE-2026-8632 hplip: Privilege escalation and arbitrary code execution
+  via OS command injection in Is_Process_Running()
+
 * Mon Aug 09 2021 Mohan Boddu <mboddu@redhat.com> - 3.21.2-6
 - Rebuilt for IMA sigs, glibc 2.34, aarch64 flags
   Related: rhbz#1991688
