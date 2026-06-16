@@ -7,7 +7,7 @@
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.18.4
-Release: 9%{?dist}
+Release: 13%{?dist}
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
@@ -45,6 +45,16 @@ Patch28: hplip-colorlaserjet-mfp-m278-m281.patch
 Patch30: hplip-typo.patch
 Patch31: hplip-keyserver.patch
 Patch32: hplip-covscan.patch
+# CVE-2026-8632 - Privilege escalation and arbitrary code execution
+# via operating system command injection in Is_Process_Running()
+# https://redhat.atlassian.net/browse/RHEL-178359
+Patch33: hplip-CVE-2026-8632.patch
+# CVE-2026-8631 - Arbitrary code execution and privilege escalation
+# via integer overflow in hpcups
+# https://redhat.atlassian.net/browse/RHEL-178718
+Patch34: hplip-CVE-2026-8631.patch
+# OSH fixes after CVE-2026-8631
+Patch35: hplip-CVE-2026-8631-osh.patch
 
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 Requires: python3-pillow
@@ -253,6 +263,12 @@ rm prnt/hpcups/ErnieFilter.{cpp,h} prnt/hpijs/ernieplatform.h
 
 # 1602547 - Please review important issues found by covscan in "hplip-3.18.4-2.el8+7" package
 %patch32 -p1 -b .covscan
+# CVE-2026-8632 - command injection in Is_Process_Running()
+%patch -P 33 -p1 -b .CVE-2026-8632
+# CVE-2026-8631 - integer overflow in hpcups
+%patch -P 34 -p1 -b .CVE-2026-8631
+# OSH fixes after CVE-2026-8631
+%patch -P 35 -p1 -b .CVE-2026-8631-osh
 
 sed -i.duplex-constraints \
     -e 's,\(UIConstraints.* \*Duplex\),//\1,' \
@@ -538,6 +554,20 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Mon Jun 15 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.18.4-13
+- Fix more leaks in hpcups
+
+* Fri Jun 12 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.18.4-12
+- OSH fixes after CVE-2026-8631
+
+* Tue Jun 09 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.18.4-11
+- CVE-2026-8631 hplip: Arbitrary code execution and privilege escalation
+  via integer overflow in hpcups
+
+* Wed May 27 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.18.4-10
+- CVE-2026-8632 hplip: Privilege escalation and arbitrary code execution
+  via OS command injection in Is_Process_Running()
+
 * Fri Jun 14 2019 Tomas Korbar <tkorbar@redhat.com> - 3.18.4-9
 - update patch for covscan bug rhbz#1602547
 
