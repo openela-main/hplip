@@ -7,7 +7,7 @@
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.21.2
-Release: 6%{?dist}.4
+Release: 6%{?dist}.5
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
@@ -841,6 +841,9 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Fri Jul 03 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.21.2-6.5
+- RHEL-192001 CVE-2026-14544 hplip: Incomplete Fix for CVE-2026-8631
+
 * Mon Jun 15 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.21.2-6.4
 - Fix more leaks in hpcups
 
