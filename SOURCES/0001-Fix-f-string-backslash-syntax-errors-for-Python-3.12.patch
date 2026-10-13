@@ -1,0 +1,48 @@
+From 66209ff0d1daf3df7ae9e2a7ae0e4f8ccd338f44 Mon Sep 17 00:00:00 2001
+From: Zdenek Dohnal <zdohnal@redhat.com>
+Date: Tue, 29 Sep 2026 18:46:52 +0200
+Subject: [PATCH] Fix f-string backslash syntax errors for Python < 3.12
+
+Python versions before 3.12 (including 3.6 on RHEL 8 and 3.9 on
+RHEL 9) do not allow backslash characters inside f-string expression
+parts, raising SyntaxError. Replace the nested f-strings containing
+'\n' with %-formatting to maintain compatibility.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+ base/os_utils.py | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/base/os_utils.py b/base/os_utils.py
+index d918822..8730a33 100644
+--- a/base/os_utils.py
++++ b/base/os_utils.py
+@@ -42,18 +42,18 @@ def execute(cmd):
+             process.wait()
+             stdout, stderr = process.communicate()
+ 
+-            log.debug(f"Command executed: {cmd}{f'\n{stdout.decode()}' if stdout else ''}")
++            log.debug("Command executed: %s%s" % (cmd, '\n' + stdout.decode() if stdout else ''))
+ 
+             if process.returncode != 0:
+-                log.error(f"Command failed with return code" \
+-                          f"{process.returncode}: {cmd}" \
+-                          f"{f'\n{stderr.decode()}' if stderr else ''}")
++                log.error("Command failed with return code"
++                          " %s: %s%s" % (process.returncode, cmd,
++                          '\n' + stderr.decode() if stderr else ''))
+ 
+             return process.returncode
+         except subprocess.CalledProcessError as e:
+-            log.error(f"Command failed with return code" \
+-                      f"{e.returncode}: {cmd}" \
+-                      f"{f'\n{e.stderr.decode()}' if e.stderr else ''}")
++            log.error("Command failed with return code"
++                      " %s: %s%s" % (e.returncode, cmd,
++                      '\n' + e.stderr.decode() if e.stderr else ''))
+             return e.returncode
+         except Exception as e:
+             log.error(f"Error executing command: {cmd}\n{str(e)}")
+-- 
+2.55.0
+

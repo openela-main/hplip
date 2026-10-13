@@ -6,15 +6,37 @@
 
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
-Version: 3.18.4
-Release: 14%{?dist}
+Version: 3.26.6
+Release: 3%{?dist}
+# most files (base/*, *, ui*/...) - GPL2+
+# prnt/hpijs/ jpeg related files - IJG
+# prnt/* - BSD-3-Clause-HP - it is modified a little, asked here https://gitlab.com/fedora/legal/fedora-license-data/-/issues/267
+# base/exif.py - BSD-2-Clause - reported as https://gitlab.com/fedora/legal/fedora-license-data/-/issues/268
+# base/ldif.py - python-ldap - reported https://gitlab.com/fedora/legal/fedora-license-data/-/issues/269
+# io/*, scan/* - MIT
+# protocol/discovery/* - LGPL-2.1-or-later
+# protocol/* - GPL2only
+# scan/sane/sane.h - Public Domain
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
-Source0: http://downloads.sourceforge.net/sourceforge/hplip/hplip-%{version}.tar.gz
+# Original source tarball
+# Source0: http://downloads.sourceforge.net/sourceforge/hplip/hplip-%%{version}.tar.gz
+#
+# Repacked source tarball without redundant files - always repack
+# the original tarball once a new version arrives by:
+#
+# ./hplip-repack.sh <version>
+#
+
+Source0: hplip-%{version}-repack.tar.gz
 Source1: hpcups-update-ppds.sh
 Source2: copy-deviceids.py
 Source3: %{name}.appdata.xml
+Source4: hp-laserjet_cp_1025nw.ppd.gz
+Source5: hp-laserjet_professional_p_1102w.ppd.gz
+Source6: hplip-repack.sh
+
 Patch1: hplip-pstotiff-is-rubbish.patch
 Patch2: hplip-strstr-const.patch
 Patch3: hplip-ui-optional.patch
@@ -33,69 +55,302 @@ Patch15: hplip-ppd-ImageableArea.patch
 Patch16: hplip-scan-tmp.patch
 Patch17: hplip-log-stderr.patch
 Patch18: hplip-avahi-parsing.patch
-Patch20: hplip-dj990c-margin.patch
-Patch21: hplip-strncpy.patch
-Patch22: hplip-no-write-bytecode.patch
-Patch23: hplip-silence-ioerror.patch
-Patch24: hplip-3165-sourceoption.patch
-Patch25: hplip-noernie.patch
-Patch26: hplip-appdata.patch
-Patch27: hplip-check-cups.patch
-Patch28: hplip-colorlaserjet-mfp-m278-m281.patch
-Patch30: hplip-typo.patch
-Patch31: hplip-keyserver.patch
-Patch32: hplip-covscan.patch
-# CVE-2026-8632 - Privilege escalation and arbitrary code execution
-# via operating system command injection in Is_Process_Running()
-# https://redhat.atlassian.net/browse/RHEL-178359
-Patch33: hplip-CVE-2026-8632.patch
-# CVE-2026-8631 - Arbitrary code execution and privilege escalation
-# via integer overflow in hpcups
-# https://redhat.atlassian.net/browse/RHEL-178718
-Patch34: hplip-CVE-2026-8631.patch
-# OSH fixes after CVE-2026-8631
-Patch35: hplip-CVE-2026-8631-osh.patch
+Patch19: hplip-dj990c-margin.patch
+Patch20: hplip-strncpy.patch
+Patch21: hplip-no-write-bytecode.patch
+Patch22: hplip-silence-ioerror.patch
+Patch23: hplip-sourceoption.patch
+Patch24: hplip-noernie.patch
+Patch25: hplip-appdata.patch
+Patch26: hplip-check-cups.patch
+Patch27: hplip-typo.patch
+# python3 - recent HP release removed encoding/decoding to utf-8 in fax/pmlfax.py -
+# that results in text string going into translate function in base/utils.py, which
+# expects binary string because of parameters. Remove this patch if base/utils.py
+# code gets fixed.
+Patch28: hplip-use-binary-str.patch
+# m278-m281 doesn't work correctly again
+Patch29: hplip-error-print.patch
+Patch30: hplip-hpfax-importerror-print.patch
+Patch31: hplip-wifisetup.patch
+# pgp.mit.edu keyserver got bad connection, so we need to have pool of keyservers
+# to choose (Bz#1641100, launchpad#1799212)
+# F42+ update: HP has new key, and currently only on Ubuntu keyserver - so this patch now
+# only adjust terminal output, we will see if connection problems reappear
+Patch32: hplip-keyserver.patch
+# QMessagebox call was copy-pasted from Qt4 version, but Qt5 has different arguments,
+# This patch solves most of them
+Patch33: 0026-Call-QMessageBox-constructors-of-PyQT5-with-the-corr.patch
+# HP upstream introduced new binary blob, which is not open-source, so it violates
+# FPG by two ways - shipping binary blob and non open source code - so it needs to be removed.
+# Patch is taken from Debian.
+Patch34: 0025-Remove-all-ImageProcessor-functionality-which-is-clo.patch
+# In hplip-3.18.10 some parts of UI code was commented out, which leaved hp-toolbox
+# unusable (crashed on the start). The patch removes usages of variables, which were
+# commented out.
+# The patch is taken from Debian.
+Patch35: 0027-Fixed-incomplete-removal-of-hp-toolbox-features-whic.patch
+# hp-setup crashed when user wanted to define a path to PPD file. It was due
+# byte + string variables incompatibility and it is fixed by decoding the 
+# bytes-like variable
+# part of https://bugzilla.redhat.com/show_bug.cgi?id=1666076
+# reported upstream https://bugs.launchpad.net/hplip/+bug/1814272
+Patch36: hplip-add-ppd-crash.patch
+# external scripts, which are downloaded and run by hp-plugin, try to create links
+# in non-existing dirs. These scripts ignore errors, so plugin is installed fine
+# but then internal hp-plugin can check for plugin state, where links are checked too.
+# It results in corrupted plugin state, which breaks printer installation by GUI hp-setup.
+# Temporary workaround is to ignore these bad links and real fix should come from HP,
+# because their external scripts try to create links in non-existing dirs.
+# Bugzilla: https://bugzilla.redhat.com/show_bug.cgi?id=1671513
+# Reported upstream: https://bugs.launchpad.net/hplip/+bug/1814574
+Patch37: hplip-missing-links.patch
+# change in 3.18.9 in scanext.c caused broken scanning for HP LaserJet 3052. Since I cannot figure
+# it out what author wanted by the change (it sets option number 9 to true, but different handles
+# have different options, so I'm not sure what author wanted to set).
+# Remove the change for now, it works for user and me.
+Patch38: hplip-hplj-3052.patch
+# hpmud parses mdns txt record badly
+# upstream tickets: https://bugs.launchpad.net/hplip/+bug/1797501
+#                   https://bugs.launchpad.net/hplip/+bug/1817214
+#                   https://bugs.launchpad.net/hplip/+bug/1821932
+# with no response from upstream
+# Patch taken from Debian https://lists.debian.org/debian-printing/2018/11/msg00049.html
+Patch39: hplip-hpmud-string-parse.patch
+# Part of https://bugzilla.redhat.com/show_bug.cgi?id=1694663
+# It was found out that specific device needs plugin for scanning
+# Reported upstream as https://bugs.launchpad.net/hplip/+bug/1822762
+Patch40: hplip-m278-m281-needs-plugin.patch
+# hpcups crashes when a printer needs a plugin and does not have one installed
+# it crashes in destructor, because pointer is not initialized
+# bugzilla https://bugzilla.redhat.com/show_bug.cgi?id=1695716
+# reported upstream 
+Patch41: hplip-hpcups-crash.patch
+# Fixing the issues found by coverity scan
+# reported upstream https://bugs.launchpad.net/hplip/+bug/1808145
+Patch42: hplip-covscan.patch
+# Segfault during logging to syslog because argument are switched
+# bugzilla https://bugzilla.redhat.com/show_bug.cgi?id=1727162
+# upstream https://bugs.launchpad.net/hplip/+bug/1837846
+Patch43: hplip-logging-segfault.patch
+# Traceback in hp-systray when there are no resource
+# wanted to report upstream, but launchpad ends with timeout error
+# bugzilla https://bugzilla.redhat.com/show_bug.cgi?id=1738321
+Patch44: hplip-systray-blockerror.patch
+# several printers were removed in 3.19.1, but actually someone still uses them
+# reported upstream https://bugs.launchpad.net/hplip/+bug/1843592
+# bugzillas 1742949, 1740132, 1739855
+Patch45: hplip-missing-drivers.patch
+# laserjet 2200 and other devices have different device id than HP expects...
+# https://bugzilla.redhat.com/show_bug.cgi?id=1772698
+# reported upstream https://bugs.launchpad.net/hplip/+bug/1853002
+Patch46: hplip-model-mismatch.patch
+# sixext has problems with python3 strings (bz#1573430)
+# reported https://bugs.launchpad.net/bugs/1480152
+Patch47: hplip-unicodeerror.patch
+# error with new gcc, already reported in upstream as
+# https://bugs.launchpad.net/hplip/+bug/1836735
+Patch48: hplip-fix-Wreturn-type-warning.patch
+# upstream check for python clears OS build system
+# CFLAGS
+# https://bugs.launchpad.net/hplip/+bug/1879445
+Patch49: hplip-configure-python.patch
+# taken from hplip upstream report - toolbox uses deprecated method
+# setMargin(), which generates an exception, resulting in a infinite loop
+# of request on cupsd
+# https://bugs.launchpad.net/hplip/+bug/1880275
+Patch50: hplip-dialog-infinite-loop.patch
+# searching algorithm did not expect '-' in model name and thought it is a new PDL
+# it resulted in incorrect PPD match, so e.g. hpijs driver was used instead of hpcups
+# bug: https://bugzilla.redhat.com/show_bug.cgi?id=1590014
+# reported upstream: https://bugs.launchpad.net/hplip/+bug/1881587
+Patch51: hplip-find-driver.patch
+# hp-clean didn't work for Photosmart C1410 because it was comparing
+# string length with buffer size for string object, which is different,
+# causing cleaning to fail - the fix is to make the object bytes-like,
+# then buffer size is the same as the length.
+# Thanks to Stefan Assmann we were able to fix level 1 cleaning
+# for the device, but there can be similar issues with other devices
+# bug https://bugzilla.redhat.com/show_bug.cgi?id=1833308
+# reported upstream https://bugs.launchpad.net/hplip/+bug/1882193
+Patch52: hplip-clean-ldl.patch
+# 3.20.6 turned off requirement for most devices which needed it
+# - it will cause malfunction of printing and scanning for them
+# https://bugs.launchpad.net/hplip/+bug/1883898
+Patch53: hplip-revert-plugins.patch
+# if an user tries to install scanner via hp-setup (printer/fax utility)
+# it fails further down - break out earlier with a message
+# reported upstream as https://bugs.launchpad.net/hplip/+bug/1916114
+Patch54: hplip-hpsetup-noscanjets.patch
+# 1963114 - patch for hplip firmware load timeout fix
+# reported upstream https://bugs.launchpad.net/hplip/+bug/1922404
+Patch55: hplip-hpfirmware-timeout.patch
+# 1985251 - Incorrect permission for gpg directory
+# reported upstream https://bugs.launchpad.net/hplip/+bug/1938442
+Patch56: hplip-gpgdir-perms.patch
+# 1987141 - hp-plugin installs malformed udev files
+# reported upstream https://bugs.launchpad.net/hplip/+bug/1847477
+Patch57: hplip-plugin-udevissues.patch
+# 2080235 - Misleading errors about missing shared libraries when scanning
+# downstream patch to prevent errors:
+# - when loading libhpmud.so - unversioned .so files belong into devel packages,
+#   but dlopen() in hplip was set to load the unversioned .so - so to remove rpmlint
+#   error (when libhpmud.so is in non-devel package) and prevent runtime dependency on -devel
+#   package (if libhpmud.so had been moved to -devel) the dlopen on unversioned .so file was
+#   removed
+# - /lib64/libm.so is not symlink but ld script, which cannot be used in dlopen()
+Patch58: hplip-no-libhpmud-libm-warnings.patch
+# C99 compatibility fixes by fweimer - use explicit int
+# Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
+Patch59: hplip-pserror-c99.patch
+# C99 compatibility patch by fweimer - several undefined functions in hpaio
+# backend are declared in orblite.h
+# Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
+Patch60: hplip-scan-hpaio-include.patch
+# C99 compatibility patch by fweimer - undefined _DBG() and dynamic linking funcs in orblite.c
+# - _DBG() looks like typo and new header is added for funcs
+# Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
+Patch61: hplip-scan-orblite-c99.patch
+# C99 compatibility patch by fweimer:
+# PyString_AsStringAndSize is removed in Python3, remove its compilation for now
+# in case there is a request for compiling it again, there is a possible solution
+# for the function py3 alternative https://opendev.org/openstack/pyeclib/commit/19c8313986
+# - disabling removes hp-unload and /usr/share/hplip/pcard as well
+# Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
+Patch62: hplip-pcardext-disable.patch
+# undefined strcasestr() in sclpml.c - build with _GNU_SOURCE
+# Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
+Patch63: hplip-sclpml-strcasestr.patch
+# 2192131 - parseQueues() doesn't get device uri from 'lpstat -v', because parsing pattern changed
+# https://bugs.launchpad.net/hplip/+bug/2027972
+Patch64: hplip-fix-parsing-lpstat.patch
+# switch to curl by downstream patch from wget to workaround openstack dropping IPv6
+# which causes great delays...
+# Remove this once internal openstack handles IPv6 better - test by pinging IPv6 in OpenStack,
+# it should not hang.
+Patch65: hplip-plugin-curl.patch
+# fix SyntaxWarning from python3.12
+# https://bugs.launchpad.net/hplip/+bug/2029480
+Patch66: hplip-use-raw-strings.patch
+# FTBFS GCC 14
+# https://bugs.launchpad.net/hplip/+bug/2048780
+Patch67: hplip-hpaio-gcc14.patch
+# function prototype did not specify argument's data types
+# https://bugs.launchpad.net/hplip/+bug/2096650
+Patch68: hplip-gcc15-stdc23.patch
+# status history table shows unformatted QDateTime values
+# https://bugs.launchpad.net/hplip/+bug/1956547
+Patch69: hplip-format-qdatetime.patch
+# hp-scan command failed to run and gives an error (fedora#2395809)
+# https://bugs.launchpad.net/hplip/+bug/2124268
+Patch70: hplip-scan-size.patch
+# 3.25.8 brings new implementation for calling commands in subprocess,
+# but again directs I/O into pipes, which does not work for TUI plugin
+# installation. Additionally it tracebacks if stdout/stderr is None
+# https://bugs.launchpad.net/hplip/+bug/2110101
+Patch71: hplip-plugin-stdout.patch
+# Fallbacking to HP site for plugin does not work for several reasons:
+# - curl was not called with -f, so error 404 from openprinting did not propagated,
+# - HP fallback URL in hplip does not contain latest changes - it now has YYYY-MM in it,
+# - connecting to HP site requires curl/wget to set user-agent to pretend to be a browser
+# https://bugs.launchpad.net/hplip/+bug/2154206
+Patch72: hplip-curl-fallback.patch
+# downstream patch, Python < 3.12 forbids backslash in f-strings
+Patch73: 0001-Fix-f-string-backslash-syntax-errors-for-Python-3.12.patch
+# OSH fixes for 3.26.6
+Patch74: hplip-osh-fixes-3.26.6.patch
+# Fix LEDM scanning
+# https://bugs.launchpad.net/hplip/+bug/2169330
+Patch75: hplip-scan-exceed-buf.patch
 
-Requires: %{name}-libs%{?_isa} = %{version}-%{release}
-Requires: python3-pillow
-Requires: cups
-Requires: wget
-Requires: python3-dbus
-# set require directly to /usr/bin/gpg, because gnupg2 and gnupg ships it,
-# but gnupg will be deprecated in the future
-Requires: %{_bindir}/gpg
-# /usr/lib/udev/rules.d
-Requires: systemd
+%if 0%{?fedora} || 0%{?rhel} <= 8
+# mention hplip-gui if you want to have GUI
+Patch1000: hplip-fedora-gui.patch
+%endif
 
+
+# uses automatic creation of configure
+BuildRequires: autoconf
+# uses automatic creation of Makefile
+BuildRequires: automake
+# Make sure we get postscriptdriver tags - need cups and python3-cups.
+BuildRequires: cups
+# uses functions from CUPS in filters, backends and libraries defining them
+BuildRequires: cups-devel
+%if 0%{?rhel} <= 8 || 0%{?fedora}
+# needed for desktop file validation in spec file
+BuildRequires: desktop-file-utils
+%endif
 # gcc and gcc-c++ are no longer in buildroot by default
-
 # gcc is needed for compilation of HPAIO scanning backend, HP implementation of
-# IPP and MDNS protocols, hpps driver, hp backend, hpip (image processing 
+# IPP and MDNS protocols, hpps driver, hp backend, hpip (image processing
 # library), multipoint transport driver hpmud
 BuildRequires: gcc
 # gcc-c++ is needed for hpijs, hpcups drivers
 BuildRequires: gcc-c++
-
-BuildRequires: autoconf automake libtool
-BuildRequires: net-snmp-devel
-BuildRequires: cups-devel
-BuildRequires: python3-devel
+# support for JPEG file formats in hp-scan
 BuildRequires: libjpeg-devel
-BuildRequires: desktop-file-utils
+# uses libtool for autorconf
+BuildRequires: libtool
+# implements support for USB devices
 BuildRequires: libusb1-devel
+# uses make
+BuildRequires: make
+# SLP device discovery is based on SNMP
+BuildRequires: net-snmp-devel
+# wasn't able to find out why, but SO libraries in hplip-libs require them...
 BuildRequires: openssl-devel
-BuildRequires: sane-backends-devel
+# supports mDNS device discovery via Avahi
+BuildRequires: pkgconfig(avahi-client)
+BuildRequires: pkgconfig(avahi-core)
 BuildRequires: pkgconfig(dbus-1)
-
-# Make sure we get postscriptdriver tags.
-BuildRequires: python3-cups, cups
-
+BuildRequires: python3-cups
+# implements C Python extensions like hpmudext, cupsext, scanext
+BuildRequires: python3-devel
+# distutils are removed in Python3.12, use setuptools
+BuildRequires: python3-setuptools
+# SANE backend hpaio uses function from SANE API
+BuildRequires: sane-backends-devel
 # macros: %%{_tmpfilesdir}, %%{_udevrulesdir}
 BuildRequires: systemd
 
-# hpijs was merged into main package in 3.15.7-2
-Obsoletes: hpijs < 1:%{version}-%{release}
-Provides:  hpijs = 1:%{version}-%{release}
+%if 0%{?fedora} || 0%{?rhel} <= 8
+Suggests: hplip-gui
+%endif
+# uses avahi-browse for discovering IPP-over-USB printers
+Recommends: avahi-tools
+# 1733449 - Scanner on an HP AIO printer is not detected unless libsane-hpaio is installed
+Recommends: libsane-hpaio%{?_isa} = %{version}-%{release}
+# downloaded plugin requires python3-gobject to work even via CLI...
+# but make it weak dependency, so users which don't need the plugin and have servers
+# can remove the python3-gobject which is used by desktop apps
+Recommends: python3-gobject
+
+Requires: cups
+# switch to curl by downstream patch from wget to workaround openstack dropping IPv6
+# which causes great delays...
+Requires: curl
+# set require directly to /usr/bin/gpg, because gnupg2 and gnupg ships it,
+# but gnupg will be deprecated in the future
+Requires: %{_bindir}/gpg
+Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+Requires: python3-dbus
+%if 0%{?rhel} <= 8 || 0%{?fedora}
+Requires: python3-pillow
+%endif
+# user+group lp
+Requires: setup
+# /usr/lib/udev/rules.d
+Requires: systemd
+# 1788643 - Fedora minimal does not ship tar by default
+Requires: tar
+# require usbutils, hp-diagnose_queues needs lsusb
+Requires: usbutils
+
+# require coreutils, because timeout binary is needed in post scriptlet,
+# because hpcups-update-ppds script can freeze in certain situation and
+# stop the update
+Requires(post): coreutils
 
 %description
 The Hewlett-Packard Linux Imaging and Printing Project provides
@@ -103,40 +358,42 @@ drivers for HP printers and multi-function peripherals.
 
 %package common
 Summary: Files needed by the HPLIP printer and scanner drivers
-License: GPLv2+
 
 %description common
 Files needed by the HPLIP printer and scanner drivers.
 
 %package libs
 Summary: HPLIP libraries
-License: GPLv2+ and MIT
 Requires: %{name}-common%{?_isa} = %{version}-%{release}
-Requires: %{__python3}
-Obsoletes: %{name}-compat-libs < %{version}-%{release}
+Requires: python3
 
 %description libs
 Libraries needed by HPLIP.
 
+%if 0%{?rhel} <= 8 || 0%{?fedora}
 %package gui
 Summary: HPLIP graphical tools
-License: BSD
 BuildRequires: libappstream-glib
-Requires: python3-qt5
-Requires: python3-reportlab
+
+# for avahi-browse - looks for devices on local network
+Recommends: avahi-tools
+Recommends: libsane-hpaio%{?_isa} = %{version}-%{release}
+# for hp-check
+Recommends: pkgconf
+
+Requires: %{name}%{?_isa} = %{version}-%{release}
 # hpssd.py
 Requires: python3-gobject
-Requires: %{name}%{?_isa} = %{version}-%{release}
-Requires: libsane-hpaio%{?_isa} = %{version}-%{release}
+Requires: python3-reportlab
+Requires: python3-qt5
 
 %description gui
 HPLIP graphical tools.
+%endif
 
 %package -n libsane-hpaio
 Summary: SANE driver for scanners in HP's multi-function devices
-License: GPLv2+
-Obsoletes: libsane-hpoj < 0.91
-Provides: libsane-hpoj = 0.91
+
 Requires: sane-backends
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 
@@ -147,21 +404,21 @@ SANE driver for scanners in HP's multi-function devices (from HPOJ).
 %setup -q
 
 # The pstotiff filter is rubbish so replace it (launchpad #528394).
-%patch1 -p1 -b .pstotiff-is-rubbish
+%patch -P 1 -p1 -b .pstotiff-is-rubbish
 
 # Fix compilation.
-%patch2 -p1 -b .strstr-const
+%patch -P 2 -p1 -b .strstr-const
 
 # Make utils.checkPyQtImport() look for the gui sub-package (bug #243273).
-%patch3 -p1 -b .ui-optional
+%patch -P 3 -p1 -b .ui-optional
 
 # Make sure to avoid handwritten asm.
-%patch4 -p1 -b .no-asm
+%patch -P 4 -p1 -b .no-asm
 
 # Corrected several IEEE 1284 Device IDs using foomatic data.
 # Color LaserJet 2500 series (bug #659040)
 # LaserJet 4100 Series/2100 Series (bug #659039)
-%patch5 -p1 -b .deviceIDs-drv
+%patch -P 5 -p1 -b .deviceIDs-drv
 chmod +x %{SOURCE2}
 mv prnt/drv/hpijs.drv.in{,.deviceIDs-drv-hpijs}
 %{SOURCE2} prnt/drv/hpcups.drv.in \
@@ -169,28 +426,28 @@ mv prnt/drv/hpijs.drv.in{,.deviceIDs-drv-hpijs}
            > prnt/drv/hpijs.drv.in
 
 # Move udev rules from /etc/ to /usr/lib/ (bug #748208).
-%patch6 -p1 -b .udev-rules
+%patch -P 6 -p1 -b .udev-rules
 
 # Retry when connecting to device fails (bug #532112).
-%patch7 -p1 -b .retry-open
+%patch -P 7 -p1 -b .retry-open
 
 # Mark SNMP quirks in PPD for HP OfficeJet Pro 8500 (bug #581825).
-%patch8 -p1 -b .snmp-quirks
+%patch -P 8 -p1 -b .snmp-quirks
 
 # Fixed bogus low ink warnings from hpijs driver (bug #643643).
-%patch9 -p1 -b .hpijs-marker-supply
+%patch -P 9 -p1 -b .hpijs-marker-supply
 
 # Clear old printer-state-reasons we used to manage (bug #510926).
-%patch10 -p1 -b .clear-old-state-reasons
+%patch -P 10 -p1 -b .clear-old-state-reasons
 
 # Avoid busy loop in hpcups when backend has exited (bug #525944).
-%patch11 -p1 -b .hpcups-sigpipe
+%patch -P 11 -p1 -b .hpcups-sigpipe
 
 # CUPS filters should use TMPDIR when available (bug #865603).
-%patch12 -p1 -b .logdir
+%patch -P 12 -p1 -b .logdir
 
 # Fixed Device ID parsing code in hpijs's dj9xxvip.c (bug #510926).
-%patch13 -p1 -b .bad-low-ink-warning
+%patch -P 13 -p1 -b .bad-low-ink-warning
 
 # Add Device ID for
 # HP LaserJet Color M451dn (bug #1159380)
@@ -198,7 +455,7 @@ for ppd_file in $(grep '^diff' %{PATCH14} | cut -d " " -f 4);
 do
   gunzip ${ppd_file#*/}.gz
 done
-%patch14 -p1 -b .deviceIDs-ppd
+%patch -P 14 -p1 -b .deviceIDs-ppd
 for ppd_file in $(grep '^diff' %{PATCH14} | cut -d " " -f 4);
 do
   gzip -n ${ppd_file#*/}
@@ -209,66 +466,177 @@ for ppd_file in $(grep '^diff' %{PATCH15} | cut -d " " -f 4);
 do
   gunzip ${ppd_file#*/}.gz
 done
-%patch15 -p1 -b .ImageableArea
+%patch -P 15 -p1 -b .ImageableArea
 for ppd_file in $(grep '^diff' %{PATCH15} | cut -d " " -f 4);
 do
   gzip -n ${ppd_file#*/}
 done
 
 # Scan to /var/tmp instead of /tmp (bug #1076954).
-%patch16 -p1 -b .scan-tmp
+%patch -P 16 -p1 -b .scan-tmp
 
 # Treat logging before importing of logger module (bug #984699).
-%patch17 -p1 -b .log-stderr
+%patch -P 17 -p1 -b .log-stderr
 
 # Fix parsing of avahi-daemon output (bug #1096939).
-%patch18 -p1 -b .parsing
+%patch -P 18 -p1 -b .parsing
 
 # Fixed left/right margins for HP DeskJet 990C (LP #1405212).
-%patch20 -p1 -b .dj990c-margin
+%patch -P 19 -p1 -b .dj990c-margin
 
 # Fixed uses of strncpy throughout.
-%patch21 -p1 -b .strncpy
+%patch -P 20 -p1 -b .strncpy
 
 # Don't try to write bytecode cache for hpfax backend (bug #1192761)
 # or hp-config_usb_printer (bug #1266903)
 # or hpps filter (bug #1241548).
-%patch22 -p1 -b .no-write-bytecode
+%patch -P 21 -p1 -b .no-write-bytecode
 
 # Ignore IOError when logging output (bug #712537).
-%patch23 -p1 -b .silence-ioerror
+%patch -P 22 -p1 -b .silence-ioerror
 
 # [abrt] hplip: hp-scan:663:<module>:NameError: name 'source_option' is not defined (bug #1341304)
-%patch24 -p1 -b .sourceoption
+%patch -P 23 -p1 -b .sourceoption
 
 # hplip license problem (bug #1364711)
-%patch25 -p1 -b .no-ernie
+%patch -P 24 -p1 -b .no-ernie
 
 # hplip appdata
-%patch26 -p1 -b .appdata
-
-rm prnt/hpcups/ErnieFilter.{cpp,h} prnt/hpijs/ernieplatform.h
+%patch -P 25 -p1 -b .appdata
 
 # hp-check shows 'CUPS incompatible or not running' even if CUPS is running (bug #1456467)
-%patch27 -p1 -b .check-cups
-
-# Add support for HP ColorLaserjet MFP M278-M281 (bug #1509394)
-%patch28 -p1 -b .colorlaserjet-mfp-m278-m281
+%patch -P 26 -p1 -b .check-cups
 
 # hp-firmware:NameError: name 'INTERACTIVE_MODE4' is not defined (bug #1533869)
-%patch30 -p1 -b .typo
+%patch -P 27 -p1 -b .typo
 
-# 1649487 - Retrieve public key from pool of keyservers
-%patch31 -p1 -b .keyserver
+%patch -P 28 -p1 -b .use-binary-str
 
-# 1602547 - Please review important issues found by covscan in "hplip-3.18.4-2.el8+7" package
-%patch32 -p1 -b .covscan
-# CVE-2026-8632 - command injection in Is_Process_Running()
-%patch -P 33 -p1 -b .CVE-2026-8632
-# CVE-2026-8631 - integer overflow in hpcups
-%patch -P 34 -p1 -b .CVE-2026-8631
-# OSH fixes after CVE-2026-8631
-%patch -P 35 -p1 -b .CVE-2026-8631-osh
+# TypeError: 'Error' object does not support indexing (bug #1564770)
+# upstream bug: https://bugs.launchpad.net/ubuntu/+source/hplip/+bug/1718129
+# in python2 it was possible to acces Exception message by index [0].
+# in python3 this is no longer possible and it causes TypeError.
+%patch -P 29 -p1 -b .error-print-fix
+
+# TypeError: not all arguments converted during string formatting (bug #1566938)
+# upstream bug: https://bugs.launchpad.net/ubuntu/+source/hplip/+bug/616450
+# bug caused by more arguments than argument specifiers in formatted string
+%patch -P 30 -p1 -b .hpfax-import-error-print
+
+# 'WifiSetupDialog' object has no attribute 'wifiobj' (bug #1626877)
+# upstream bug: https://bugs.launchpad.net/hplip/+bug/1752060
+# bug caused by typo in wifisetupdialog wifiObj property call
+%patch -P 31 -p1 -b .wifisetup-bad-call-fix
+
+# have pool of keyservers to choose
+%patch -P 32 -p1 -b .keyserver
+
+# TypeError: argument 5 has unexpected type 'StandardButtons' (bug #1594602)
+# upstream bug: https://bugs.launchpad.net/ubuntu/+source/hplip/+bug/1745383
+# bug caused by typo in QMessageBox constructor call
+# this patch fixes more of those typos - some fixed by tkorbar, some taken from ubuntu fix
+%patch -P 33 -p1 -b .qmsgbox-typos-fix
+
+# removal of non open source code, taken from ubuntu
+%patch -P 34 -p1 -b .libimageprocessor-removal
+
+%{_bindir}/rm prnt/hpcups/libImageProcessor-x86*
+
+%patch -P 35 -p1 -b .toolbox-crash
+# part of https://bugzilla.redhat.com/show_bug.cgi?id=1666076
+%patch -P 36 -p1 -b .add-ppd-crash
+# 1671513 - after 'successful' plugin installation it is not installed
+%patch -P 37 -p1 -b .missing-links
+# 1684434 - Scanning broken for HP LaserJet 3052
+%patch -P 38 -p1 -b .hp-laserjet-3052-broken-scanning
+# 1694663 - Cannot scan with M281fdw LaserJet - failed: Error during device I/O (part 1)
+%patch -P 39 -p1 -b .hpmud-string-parse
+# 1694663 - Cannot scan with M281fdw LaserJet - failed: Error during device I/O (part 2)
+%patch -P 40 -p1 -b .m278-m281-needs-plugin
+# 1695716 - hpcups crashes in Compressor destructor
+%patch -P 41 -p1 -b .hpcups-crash
+# fixing issues found by coverity scan
+%patch -P 42 -p1 -b .covscan
+# segfault during logging (1727162)
+%patch -P 43 -p1 -b .logging-segfault
+# 1738321 - [abrt] hp-systray:BlockingIOError: [Errno 11] Resource temporarily unavailable
+%patch -P 44 -p1 -b .systray-blockerror
+# 1742949, 1740132, 1739855 - missing drivers
+%patch -P 45 -p1 -b .missing-drivers
+# 1772698 - Can't setup printer (HP LJ 2200): no attributes found in model.dat
+%patch -P 46 -p1 -b .model-mismatch
+# 1573430 - sixext.py:to_string_utf8:UnicodeDecodeError: 'utf-8' codec can't decode bytes
+%patch -P 47 -p1 -b .unicodeerror
+%patch -P 48 -p1 -b .Wreturn-fix
+%patch -P 49 -p1 -b .configure-python
+%patch -P 50 -p1 -b .dialog-infinite-loop
+# 1590014 - hplip PPD search doesn't expect '-' in device name
+%patch -P 51 -p1 -b .find-driver
+# 1833308 - hp-clean cannot clean HP PSC1410 - Device I/O error
+%patch -P 52 -p1 -b .clean-ldl
+%patch -P 53 -p1 -b .revert-plugins
+# if an user tries to install scanner via hp-setup (printer/fax utility)
+# it fails further down - break out earlier with a message
+%patch -P 54 -p1 -b .hpsetup-noscanjets
+# 1963114 - patch for hplip firmware load timeout fix
+%patch -P 55 -p1 -b .hpfirmware-timeout
+# 1985251 - Incorrect permission for gpg directory
+%patch -P 56 -p1 -b .gpgdir-perms
+# 1987141 - hp-plugin installs malformed udev files
+%patch -P 57 -p1 -b .hpplugin-udevperms
+# 2080235 - Misleading errors about missing shared libraries when scanning
+%patch -P 58 -p1 -b .no-libm-libhpmud-warn
+# C99 compatibility fixes by fweimer - use explicit int
+# Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
+%patch -P 59 -p1 -b .pserror-int
+# C99 compatibility patch by fweimer - several undefined functions in hpaio
+# backend are declared in orblite.h
+# Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
+%patch -P 60 -p1 -b .hpaio-orblite-defs
+# C99 compatibility patch by fweimer - undefined _DBG() and dynamic linking funcs in orblite.c
+# - _DBG() looks like typo and new header is added for funcs
+# Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
+%patch -P 61 -p1 -b .orblite-undefs
+# C99 compatibility patch by fweimer - python2 PyString_AsStringAndSize in python3 code
+# gives undefined reference - removed for now with dependent hp-unload
+%patch -P 62 -p1 -b .pcardext-disable
+# C99 compatibility patch by fweimer - undefined strcasestr() in sclpml.c - build with _GNU_SOURCE
+%patch -P 63 -p1 -b .sclpml-strcasestr
+# 2192131 - parseQueues() doesn't get device uri from 'lpstat -v', because parsing pattern changed
+# https://bugs.launchpad.net/hplip/+bug/2027972
+%patch -P 64 -p1 -b .lpstat-parse
+# switch to curl by downstream patch from wget to workaround openstack dropping IPv6
+# which causes great delays...
+%patch -P 65 -p1 -b .curl-switch
+# fix warnings
+# upstream https://bugs.launchpad.net/hplip/+bug/2029480
+%patch -P 66 -p1 -b .raw-strings
+# FTBFS GCC 14
+# https://bugs.launchpad.net/hplip/+bug/2048780
+%patch -P 67 -p1 -b .hpaio-gcc14
+# https://bugs.launchpad.net/hplip/+bug/2096650
+%patch -P 68 -p1 -b .gcc-strc23
+# https://bugs.launchpad.net/hplip/+bug/1956547
+%patch -P 69 -p1 -b .format-qdatetime
+# https://bugs.launchpad.net/hplip/+bug/2124268
+%patch -P 70 -p1 -b .scan-size
+# https://bugs.launchpad.net/hplip/+bug/2110101
+%patch -P 71 -p1 -b .plugin-stdout
+# https://bugs.launchpad.net/hplip/+bug/2154206
+%patch -P 72 -p1 -b .curl-fallback
+# downstream patch, Python < 3.12 forbids backslash in f-strings
+%patch -P 73 -p1 -b .no-backslash-fstrings
+# fix several important OSH issues
+%patch -P 74 -p1 -b .osh-3.26.6
+# https://bugs.launchpad.net/hplip/+bug/2169330
+%patch -P 75 -p1 -b .scan-exceed-buf
+
+# Fedora specific patches now, don't put a generic patches under it
+%if 0%{?fedora} || 0%{?rhel} <= 8
+# mention hplip-gui should be installed if you want GUI
+%patch -P 1000 -p1 -b .fedora-gui
+%endif
+
 
 sed -i.duplex-constraints \
     -e 's,\(UIConstraints.* \*Duplex\),//\1,' \
@@ -281,7 +649,8 @@ sed -i.env-python -e 's,^#!/usr/bin/env python,#!%{__python3},' \
     prnt/filters/hpps \
     fax/filters/pstotiff
 
-rm locatedriver
+cp -p %{SOURCE4} %{SOURCE5} ppd/hpcups
+
 
 %build
 # Work-around Makefile.am imperfections.
@@ -292,20 +661,26 @@ sed -i 's|^AM_INIT_AUTOMAKE|AM_INIT_AUTOMAKE([foreign])|g' configure.in
 autoreconf --verbose --force --install
 
 %configure \
-        --enable-scan-build --enable-gui-build --enable-fax-build \
-        --disable-foomatic-rip-hplip-install --enable-pp-build \
-        --disable-qt4 --enable-qt5 \
-        --enable-hpcups-install --enable-cups-drv-install \
+        --enable-fax-build \
         --enable-foomatic-drv-install \
+        --enable-gui-build \
+        --enable-hpcups-install \
         --enable-hpijs-install \
-        --disable-policykit --with-mimedir=%{_datadir}/cups/mime PYTHON=%{__python3}
+        --enable-pp-build \
+        --enable-qt5 \
+        --enable-scan-build \
+        --disable-foomatic-rip-hplip-install \
+        --disable-imageProcessor-build \
+        --disable-policykit \
+        --disable-qt4 \
+        --with-mimedir=%{_datadir}/cups/mime PYTHON=%{__python3}
 
-make %{?_smp_mflags}
+%make_build
 
 
 %install
 mkdir -p %{buildroot}%{_bindir}
-make install DESTDIR=%{buildroot} PYTHON=%{__python3}
+%make_install PYTHON=%{__python3}
 
 # Create /run/hplip & /var/lib/hp
 mkdir -p %{buildroot}/run/hplip
@@ -325,8 +700,9 @@ rm -rf  %{buildroot}%{_sysconfdir}/sane.d \
         %{buildroot}%{_docdir} \
         %{buildroot}%{_datadir}/hal/fdi \
         %{buildroot}%{_datadir}/hplip/pkservice.py \
-        %{buildroot}%{_bindir}/hp-pkservice \
-        %{buildroot}%{_datadir}/hplip/locatedriver* \
+        %{buildroot}%{_bindir}/hp-pkservice
+
+rm -rf  %{buildroot}%{_datadir}/hplip/locatedriver* \
         %{buildroot}%{_datadir}/hplip/dat2drv*
 
 rm -f   %{buildroot}%{_bindir}/hp-logcapture \
@@ -341,6 +717,7 @@ rm -f   %{buildroot}%{_bindir}/foomatic-rip \
         %{buildroot}%{_libdir}/*.la \
         %{buildroot}%{python3_sitearch}/*.la \
         %{buildroot}%{_libdir}/libhpip.so \
+        %{buildroot}%{_libdir}/libhpmud.so \
         %{buildroot}%{_libdir}/libhpipp.so \
         %{buildroot}%{_libdir}/libhpdiscovery.so \
         %{buildroot}%{_libdir}/sane/*.la \
@@ -348,8 +725,74 @@ rm -f   %{buildroot}%{_bindir}/foomatic-rip \
         %{buildroot}%{_datadir}/applications/hplip.desktop \
         %{buildroot}%{_datadir}/ppd/HP/*.ppd
 
-mkdir -p %{buildroot}%{_datadir}/appdata
-cp %{SOURCE3} %{buildroot}%{_datadir}/appdata/
+rm -f %{buildroot}%{_datadir}/hplip/hpaio.desc
+
+rm -rf %{buildroot}%{_datadir}/hplip/install.* \
+       %{buildroot}%{_datadir}/hplip/uninstall.* \
+       %{buildroot}%{_bindir}/hp-uninstall \
+       %{buildroot}%{_datadir}/hplip/upgrade.* \
+       %{buildroot}%{_bindir}/hp-upgrade \
+       %{buildroot}%{_datadir}/hplip/hplip-install
+
+rm -f %{buildroot}%{_datadir}/hplip/hpijs.drv.in.template
+
+rm -f %{buildroot}%{_datadir}/cups/mime/pstotiff.types \
+      %{buildroot}%{_datadir}/hplip/fax/pstotiff*
+
+rm -f %{buildroot}%{_datadir}/hplip/hplip-install
+
+rm -f %{buildroot}%{_unitdir}/hplip-printer@.service
+
+rm -f %{buildroot}%{_datadir}/ipp-usb/quirks/HPLIP.conf
+
+rm -rf %{buildroot}%{_bindir}/hp-unload \
+       %{buildroot}%{_datadir}/%{name}/pcard
+
+# The systray applet doesn't work properly (displays icon as a
+# window), so don't ship the launcher yet.
+rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
+
+%if 0%{?rhel} > 8
+rm -rf %{buildroot}%{_bindir}/hp-check \
+       %{buildroot}%{_bindir}/hp-devicesettings \
+       %{buildroot}%{_bindir}/hp-diagnose_plugin \
+       %{buildroot}%{_bindir}/hp-faxsetup \
+       %{buildroot}%{_bindir}/hp-linefeedcal \
+       %{buildroot}%{_bindir}/hp-makecopies \
+       %{buildroot}%{_bindir}/hp-print \
+       %{buildroot}%{_bindir}/hp-printsettings \
+       %{buildroot}%{_bindir}/hp-systray \
+       %{buildroot}%{_bindir}/hp-scan \
+       %{buildroot}%{_bindir}/hp-toolbox \
+       %{buildroot}%{_bindir}/hp-uiscan \
+       %{buildroot}%{_bindir}/hp-wificonfig \
+       %{buildroot}%{_datadir}/applications/*.desktop \
+       %{buildroot}%{_datadir}/metainfo/hplip.appdata.xml \
+       %{buildroot}%{_datadir}/icons/hicolor/*/apps/* \
+       %{buildroot}%{_datadir}/hplip/base/imageprocessing.py* \
+       %{buildroot}%{_datadir}/hplip/check.py* \
+       %{buildroot}%{_datadir}/hplip/devicesettings.py* \
+       %{buildroot}%{_datadir}/hplip/diagnose_plugin.py* \
+       %{buildroot}%{_datadir}/hplip/faxsetup.py* \
+       %{buildroot}%{_datadir}/hplip/linefeedcal.py* \
+       %{buildroot}%{_datadir}/hplip/makecopies.py* \
+       %{buildroot}%{_datadir}/hplip/print.py* \
+       %{buildroot}%{_datadir}/hplip/printsettings.py* \
+       %{buildroot}%{_datadir}/hplip/systray.py* \
+       %{buildroot}%{_datadir}/hplip/scan.py* \
+       %{buildroot}%{_datadir}/hplip/toolbox.py* \
+       %{buildroot}%{_datadir}/hplip/uiscan.py* \
+       %{buildroot}%{_datadir}/hplip/wificonfig.py* \
+       %{buildroot}%{_datadir}/hplip/data/images \
+       %{buildroot}%{_datadir}/hplip/scan \
+       %{buildroot}%{_datadir}/hplip/ui5 \
+       %{buildroot}%{_docdir}/hplip/hpscan.html \
+       doc/hpscan.html
+%endif
+
+%if 0%{?rhel} <= 8 || 0%{?fedora}
+mkdir -p %{buildroot}%{_datadir}/metainfo
+cp %{SOURCE3} %{buildroot}%{_datadir}/metainfo/
 
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/{16x16,32x32,64x64}/apps
 install -p -m644 %{buildroot}%{_datadir}/hplip/data/images/16x16/hp_logo.png \
@@ -365,14 +808,27 @@ sed -i -e '/^Categories=/d' hplip.desktop
 sed -i -e '/^Encoding=/d' hplip.desktop
 desktop-file-validate hplip.desktop
 
-desktop-file-install --vendor HP                                \
+desktop-file-install                               \
         --dir %{buildroot}/%{_datadir}/applications              \
-        --add-category System                                   \
-        --add-category Settings                                 \
+        --add-category System \
+        --add-category Settings \
         --add-category HardwareSettings                        \
         hplip.desktop
 
-appstream-util validate-relax --nonet %{buildroot}%{_datadir}/appdata/*.appdata.xml
+appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/*.appdata.xml
+
+# install hp-uiscan desktop file
+sed -i 's/\/usr\/share\/icons\/Humanity\/devices\/48\/printer\.svg/hp_logo/' hp-uiscan.desktop
+
+desktop-file-validate hp-uiscan.desktop
+
+desktop-file-install \
+          --dir %{buildroot}/%{_datadir}/applications \
+          --add-category Graphics \
+          --add-category Scanning \
+          --add-category Application \
+          hp-uiscan.desktop
+%endif
 
 # Regenerate hpcups PPDs on upgrade if necessary (bug #579355).
 install -p -m755 %{SOURCE1} %{buildroot}%{_bindir}/hpcups-update-ppds
@@ -387,34 +843,12 @@ find doc/images -type f -exec chmod 644 {} \;
 # SELinux file context (bug #564551).
 %{__mkdir_p} %{buildroot}%{_datadir}/hplip/prnt/plugins
 
-# Remove files we don't want to package.
-rm -f %{buildroot}%{_datadir}/hplip/hpaio.desc
-rm -f %{buildroot}%{_datadir}/hplip/hplip-install
-rm -rf %{buildroot}%{_datadir}/hplip/install.*
-rm -f %{buildroot}%{_datadir}/hplip/uninstall.*
-rm -f %{buildroot}%{_bindir}/hp-uninstall
-rm -f %{buildroot}%{_datadir}/hplip/upgrade.*
-rm -f %{buildroot}%{_bindir}/hp-upgrade
-rm -f %{buildroot}%{_datadir}/hplip/hpijs.drv.in.template
-rm -f %{buildroot}%{_datadir}/cups/mime/pstotiff.types
-rm -f %{buildroot}%{_datadir}/hplip/fax/pstotiff*
-rm -f %{buildroot}%{_unitdir}/hplip-printer@.service
-
-# The systray applet doesn't work properly (displays icon as a
-# window), so don't ship the launcher yet.
-rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
-
-# hp tools needs to have cups service enabled and running for its functionality
-%pre
-%{_bindir}/systemctl start cups &>/dev/null ||:
-%{_bindir}/systemctl enable cups &>/dev/null ||:
-
 %post
-%{_bindir}/hpcups-update-ppds &>/dev/null ||:
+# timeout is to prevent possible freeze during update
+%{_bindir}/timeout 10m -k 15m %{_bindir}/hpcups-update-ppds &>/dev/null ||:
 
-%post libs -p /sbin/ldconfig
+%ldconfig_scriptlets libs
 
-%postun libs -p /sbin/ldconfig
 
 %files
 %doc COPYING doc/*
@@ -426,7 +860,6 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %{_bindir}/hp-clean
 %{_bindir}/hp-colorcal
 %{_bindir}/hp-config_usb_printer
-%{_bindir}/hp-diagnose_plugin
 %{_bindir}/hp-diagnose_queues
 %{_bindir}/hp-fab
 %{_bindir}/hp-firmware
@@ -436,15 +869,17 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %{_bindir}/hp-plugin
 %{_bindir}/hp-probe
 %{_bindir}/hp-query
+%if 0%{?rhel} <= 8 || 0%{?fedora}
 %{_bindir}/hp-scan
+%endif
 %{_bindir}/hp-sendfax
 %{_bindir}/hp-setup
 %{_bindir}/hp-testpage
 %{_bindir}/hp-timedate
-%{_bindir}/hp-unload
 %{_cups_serverbin}/backend/hp
 %{_cups_serverbin}/backend/hpfax
 # ex-hpijs
+%{_cups_serverbin}/filter/hpcdmfax
 %{_cups_serverbin}/filter/hpcups
 %{_cups_serverbin}/filter/hpcupsfax
 %{_cups_serverbin}/filter/hpps
@@ -458,7 +893,6 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %{_datadir}/hplip/clean.py*
 %{_datadir}/hplip/colorcal.py*
 %{_datadir}/hplip/config_usb_printer.py*
-%{_datadir}/hplip/diagnose_plugin.py*
 %{_datadir}/hplip/diagnose_queues.py*
 %{_datadir}/hplip/fab.py*
 %{_datadir}/hplip/fax
@@ -473,7 +907,9 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %{_datadir}/hplip/plugin.py*
 %{_datadir}/hplip/probe.py*
 %{_datadir}/hplip/query.py*
+%if 0%{?rhel} <= 8 || 0%{?fedora}
 %{_datadir}/hplip/scan.py*
+%endif
 %{_datadir}/hplip/sendfax.py*
 %{_datadir}/hplip/setup.py*
 %{_datadir}/hplip/testpage.py*
@@ -487,9 +923,10 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %{_datadir}/hplip/data/pcl
 %{_datadir}/hplip/data/ps
 %{_datadir}/hplip/installer
-%{_datadir}/hplip/pcard
 %{_datadir}/hplip/prnt
+%if 0%{?rhel} <= 8 || 0%{?fedora}
 %{_datadir}/hplip/scan
+%endif
 %{_datadir}/ppd
 %{_sharedstatedir}/hp
 %dir %attr(0775,root,lp) /run/hplip
@@ -511,16 +948,16 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %{_libdir}/libhpipp.so.0.0.1
 %{_libdir}/libhpdiscovery.so.0
 %{_libdir}/libhpdiscovery.so.0.0.1
-# The so symlink is required here (see bug #489059).
-%{_libdir}/libhpmud.so
 %{_libdir}/libhpmud.so.0
 %{_libdir}/libhpmud.so.0.0.6
 # Python extension
 %{python3_sitearch}/*
 
+%if 0%{?rhel} <= 8 || 0%{?fedora}
 %files gui
 %{_bindir}/hp-check
 %{_bindir}/hp-devicesettings
+%{_bindir}/hp-diagnose_plugin
 %{_bindir}/hp-faxsetup
 %{_bindir}/hp-linefeedcal
 %{_bindir}/hp-makecopies
@@ -528,13 +965,15 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %{_bindir}/hp-printsettings
 %{_bindir}/hp-systray
 %{_bindir}/hp-toolbox
+%{_bindir}/hp-uiscan
 %{_bindir}/hp-wificonfig
 %{_datadir}/applications/*.desktop
-%{_datadir}/appdata/hplip.appdata.xml
+%{_datadir}/metainfo/hplip.appdata.xml
 # Files
 %{_datadir}/icons/hicolor/*/apps/*
 %{_datadir}/hplip/check.py*
 %{_datadir}/hplip/devicesettings.py*
+%{_datadir}/hplip/diagnose_plugin.py*
 %{_datadir}/hplip/faxsetup.py*
 %{_datadir}/hplip/linefeedcal.py*
 %{_datadir}/hplip/makecopies.py*
@@ -542,10 +981,12 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %{_datadir}/hplip/printsettings.py*
 %{_datadir}/hplip/systray.py*
 %{_datadir}/hplip/toolbox.py*
+%{_datadir}/hplip/uiscan.py*
 %{_datadir}/hplip/wificonfig.py*
 # Directories
 %{_datadir}/hplip/data/images
 %{_datadir}/hplip/ui5
+%endif
 
 %files -n libsane-hpaio
 %{_libdir}/sane/libsane-*.so
@@ -554,6 +995,15 @@ rm -f %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Mon Oct 12 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.26.6-3
+- Fix LEDM scanning
+
+* Thu Oct 08 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.26.6-2
+- fix OSH issues
+
+* Wed Sep 23 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.26.6-1
+- Rebase to 3.26.6
+
 * Fri Jul 03 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.18.4-14
 - RHEL-192009 CVE-2026-14544 hplip: Incomplete Fix for CVE-2026-8631
 
