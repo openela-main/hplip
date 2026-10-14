@@ -1,8 +1,7 @@
-diff --git a/io/hpmud/jd.c b/io/hpmud/jd.c
-index 20df27a..7ed4918 100644
---- a/io/hpmud/jd.c
-+++ b/io/hpmud/jd.c
-@@ -208,7 +208,22 @@ enum HPMUD_RESULT __attribute__ ((visibility ("hidden"))) jd_open(mud_device *pd
+diff -up hplip-3.26.6/io/hpmud/jd.c.model-mismatch hplip-3.26.6/io/hpmud/jd.c
+--- hplip-3.26.6/io/hpmud/jd.c.model-mismatch	2026-09-22 16:06:38.784863684 +0200
++++ hplip-3.26.6/io/hpmud/jd.c	2026-09-22 16:06:38.804916490 +0200
+@@ -209,7 +209,22 @@ enum HPMUD_RESULT __attribute__ ((visibi
     {
         /* Make sure uri model matches device id model. */
         hpmud_get_uri_model(pd->uri, uri_model, sizeof(uri_model));
@@ -25,11 +24,10 @@ index 20df27a..7ed4918 100644
         if (strcasecmp(uri_model, model) != 0)
         {
            stat = HPMUD_R_INVALID_URI;  /* different device plugged in */
-diff --git a/io/hpmud/model.c b/io/hpmud/model.c
-index d546ec1..adb3d87 100644
---- a/io/hpmud/model.c
-+++ b/io/hpmud/model.c
-@@ -407,7 +407,10 @@ static int ParseFile(char *datFile, char *model, char *attr, int attrSize, int *
+diff -up hplip-3.26.6/io/hpmud/model.c.model-mismatch hplip-3.26.6/io/hpmud/model.c
+--- hplip-3.26.6/io/hpmud/model.c.model-mismatch	2026-09-22 16:06:38.785079549 +0200
++++ hplip-3.26.6/io/hpmud/model.c	2026-09-22 16:08:05.192457848 +0200
+@@ -408,7 +408,10 @@ static int ParseFile(char *datFile, char
     char rcbuf[255];
     char section[128];
     char file[128];
@@ -41,8 +39,8 @@ index d546ec1..adb3d87 100644
  
     if ((fp = fopen(datFile, "r")) == NULL)
        goto bugout;
-@@ -422,10 +425,17 @@ static int ParseFile(char *datFile, char *model, char *attr, int attrSize, int *
-          strncpy(section, rcbuf+1, sizeof(section)); /* found new section */
+@@ -424,10 +427,17 @@ static int ParseFile(char *datFile, char
+          section[sizeof(section)-1] = '\0';
           n = strlen(section);
           section[n-2]=0; /* remove ']' and CR */
 +         n -= 2;
