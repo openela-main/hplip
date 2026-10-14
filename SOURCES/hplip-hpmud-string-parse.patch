@@ -1,9 +1,8 @@
-diff --git a/io/hpmud/model.c b/io/hpmud/model.c
-index 4ea8990..72c630b 100644
---- a/io/hpmud/model.c
-+++ b/io/hpmud/model.c
-@@ -420,7 +420,10 @@ static int ParseFile(char *datFile, char *model, char *attr, int attrSize, int *
-          strncpy(section, rcbuf+1, sizeof(section)); /* found new section */
+diff -up hplip-3.26.6/io/hpmud/model.c.hpmud-string-parse hplip-3.26.6/io/hpmud/model.c
+--- hplip-3.26.6/io/hpmud/model.c.hpmud-string-parse	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/io/hpmud/model.c	2026-09-22 16:02:27.113461684 +0200
+@@ -422,7 +422,10 @@ static int ParseFile(char *datFile, char
+          section[sizeof(section)-1] = '\0';
           n = strlen(section);
           section[n-2]=0; /* remove ']' and CR */
 -         if (strcasecmp(model, section) == 0)

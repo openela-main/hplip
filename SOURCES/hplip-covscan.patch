@@ -1,6 +1,6 @@
-diff -up hplip-3.23.3/common/utils.c.covscan hplip-3.23.3/common/utils.c
---- hplip-3.23.3/common/utils.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/common/utils.c	2023-05-29 13:58:10.969395214 +0200
+diff -up hplip-3.26.6/common/utils.c.covscan hplip-3.26.6/common/utils.c
+--- hplip-3.26.6/common/utils.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/common/utils.c	2026-09-22 16:03:14.766837329 +0200
 @@ -1,5 +1,9 @@
 +#ifndef _GNU_SOURCE
 +#define _GNU_SOURCE
@@ -12,10 +12,10 @@ diff -up hplip-3.23.3/common/utils.c.covscan hplip-3.23.3/common/utils.c
  #include <dlfcn.h>
  #include <sys/stat.h>
  #include <errno.h>
-diff -up hplip-3.23.3/io/hpmud/hpmud.c.covscan hplip-3.23.3/io/hpmud/hpmud.c
---- hplip-3.23.3/io/hpmud/hpmud.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/io/hpmud/hpmud.c	2023-05-29 13:58:10.970395208 +0200
-@@ -759,6 +759,7 @@ enum HPMUD_RESULT hpmud_get_dstat(HPMUD_
+diff -up hplip-3.26.6/io/hpmud/hpmud.c.covscan hplip-3.26.6/io/hpmud/hpmud.c
+--- hplip-3.26.6/io/hpmud/hpmud.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/io/hpmud/hpmud.c	2026-09-22 16:03:14.767096575 +0200
+@@ -770,6 +770,7 @@ enum HPMUD_RESULT hpmud_get_dstat(HPMUD_
     }
  
     strncpy(ds->uri, msp->device[dd].uri, sizeof(ds->uri));
@@ -23,9 +23,9 @@ diff -up hplip-3.23.3/io/hpmud/hpmud.c.covscan hplip-3.23.3/io/hpmud/hpmud.c
     ds->io_mode = msp->device[dd].io_mode;
     ds->channel_cnt = msp->device[dd].channel_cnt;
     ds->mlc_up = msp->device[dd].mlc_up;
-diff -up hplip-3.23.3/io/hpmud/jd.c.covscan hplip-3.23.3/io/hpmud/jd.c
---- hplip-3.23.3/io/hpmud/jd.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/io/hpmud/jd.c	2023-05-29 13:58:10.970395208 +0200
+diff -up hplip-3.26.6/io/hpmud/jd.c.covscan hplip-3.26.6/io/hpmud/jd.c
+--- hplip-3.26.6/io/hpmud/jd.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/io/hpmud/jd.c	2026-09-22 16:03:14.767318561 +0200
 @@ -31,6 +31,7 @@
  #endif
  
@@ -34,9 +34,9 @@ diff -up hplip-3.23.3/io/hpmud/jd.c.covscan hplip-3.23.3/io/hpmud/jd.c
  #include "hpmud.h"
  #include "hpmudi.h"
  
-diff -up hplip-3.23.3/io/hpmud/model.c.covscan hplip-3.23.3/io/hpmud/model.c
---- hplip-3.23.3/io/hpmud/model.c.covscan	2023-05-29 13:58:10.958395279 +0200
-+++ hplip-3.23.3/io/hpmud/model.c	2023-05-29 13:58:10.970395208 +0200
+diff -up hplip-3.26.6/io/hpmud/model.c.covscan hplip-3.26.6/io/hpmud/model.c
+--- hplip-3.26.6/io/hpmud/model.c.covscan	2026-09-22 16:03:14.757633422 +0200
++++ hplip-3.26.6/io/hpmud/model.c	2026-09-22 16:03:14.767539204 +0200
 @@ -117,6 +117,7 @@ static int ReadConfig()
        if (rcbuf[0] == '[')
        {
@@ -53,9 +53,9 @@ diff -up hplip-3.23.3/io/hpmud/model.c.covscan hplip-3.23.3/io/hpmud/model.c
           break;  /* done */
        }
     }
-diff -up hplip-3.23.3/io/hpmud/musb.c.covscan hplip-3.23.3/io/hpmud/musb.c
---- hplip-3.23.3/io/hpmud/musb.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/io/hpmud/musb.c	2023-05-29 13:58:10.970395208 +0200
+diff -up hplip-3.26.6/io/hpmud/musb.c.covscan hplip-3.26.6/io/hpmud/musb.c
+--- hplip-3.26.6/io/hpmud/musb.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/io/hpmud/musb.c	2026-09-22 16:03:14.767793100 +0200
 @@ -776,7 +776,7 @@ static int device_id(int fd, unsigned ch
          len = size-1;   /* leave byte for zero termination */
      if (len > 2)
@@ -65,9 +65,9 @@ diff -up hplip-3.23.3/io/hpmud/musb.c.covscan hplip-3.23.3/io/hpmud/musb.c
      buffer[len]=0;
      DBG("read actual device_id successfully fd=%d len=%d\n", fd, len);
  
-diff -up hplip-3.23.3/io/hpmud/pp.c.covscan hplip-3.23.3/io/hpmud/pp.c
---- hplip-3.23.3/io/hpmud/pp.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/io/hpmud/pp.c	2023-05-29 13:58:10.970395208 +0200
+diff -up hplip-3.26.6/io/hpmud/pp.c.covscan hplip-3.26.6/io/hpmud/pp.c
+--- hplip-3.26.6/io/hpmud/pp.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/io/hpmud/pp.c	2026-09-22 16:03:14.768123989 +0200
 @@ -632,7 +632,7 @@ static int device_id(int fd, char *buffe
        len = size-1;   /* leave byte for zero termination */
     if (len > 2)
@@ -77,9 +77,9 @@ diff -up hplip-3.23.3/io/hpmud/pp.c.covscan hplip-3.23.3/io/hpmud/pp.c
     buffer[len]=0;
  
     DBG("read actual device_id successfully fd=%d len=%d\n", fd, len);
-diff -up hplip-3.23.3/Makefile.am.covscan hplip-3.23.3/Makefile.am
---- hplip-3.23.3/Makefile.am.covscan	2023-05-29 13:58:10.944395361 +0200
-+++ hplip-3.23.3/Makefile.am	2023-05-29 13:58:10.969395214 +0200
+diff -up hplip-3.26.6/Makefile.am.covscan hplip-3.26.6/Makefile.am
+--- hplip-3.26.6/Makefile.am.covscan	2026-09-22 16:03:14.748480370 +0200
++++ hplip-3.26.6/Makefile.am	2026-09-22 16:03:14.768434230 +0200
 @@ -3,7 +3,7 @@
  #
  #  (c) 2004-2015 Copyright HP Development Company, LP
@@ -89,8 +89,8 @@ diff -up hplip-3.23.3/Makefile.am.covscan hplip-3.23.3/Makefile.am
  CFLAGS+= -DCONFDIR=\"$(hplip_confdir)\"
  CXXFLAGS+= -DCONFDIR=\"$(hplip_confdir)\"
  
-@@ -310,7 +310,7 @@ dist_pcard_DATA = pcard/__init__.py pcar
- pcardextdir = $(pyexecdir)
+@@ -323,7 +323,7 @@ pcardextdir = $(PYTHONEXECDIR)
+ pcardextdir = $(PYTHONEXECDIR)
  pcardext_LTLIBRARIES = pcardext.la
  pcardext_la_LDFLAGS = -module -avoid-version
 -pcardext_la_SOURCES = pcard/pcardext/pcardext.c pcard/fat.c
@@ -98,7 +98,7 @@ diff -up hplip-3.23.3/Makefile.am.covscan hplip-3.23.3/Makefile.am
  pcardext_la_CFLAGS = -I$(PYTHONINCLUDEDIR)
  
  # prnt
-@@ -322,7 +322,7 @@ lib_LTLIBRARIES += libhpipp.la
+@@ -335,7 +335,7 @@ lib_LTLIBRARIES += libhpipp.la
  #hpipp_LTLIBRARIES = hpipp.la
  #hpipp_la_LDFLAGS = -module -avoid-version
  libhpipp_la_SOURCES = protocol/hp_ipp.c protocol/hp_ipp.h protocol/hp_ipp_i.h
@@ -107,9 +107,9 @@ diff -up hplip-3.23.3/Makefile.am.covscan hplip-3.23.3/Makefile.am
  libhpipp_la_LDFLAGS = -version-info 0:1:0
  libhpipp_la_LIBADD = libhpmud.la
  
-diff -up hplip-3.23.3/pcard/fat.c.covscan hplip-3.23.3/pcard/fat.c
---- hplip-3.23.3/pcard/fat.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/pcard/fat.c	2023-05-29 13:58:10.971395203 +0200
+diff -up hplip-3.26.6/pcard/fat.c.covscan hplip-3.26.6/pcard/fat.c
+--- hplip-3.26.6/pcard/fat.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/pcard/fat.c	2026-09-22 16:03:14.768692504 +0200
 @@ -519,14 +519,17 @@ int FatFreeSpace(void)
  
  int FatDiskAttributes( PHOTO_CARD_ATTRIBUTES * pa )
@@ -139,9 +139,9 @@ diff -up hplip-3.23.3/pcard/fat.c.covscan hplip-3.23.3/pcard/fat.c
     cwd.StartSector = ConvertClusterToSector(fa.StartCluster);
     cwd.CurrSector = cwd.StartSector;
     cwd.StartCluster = fa.StartCluster;
-diff -up hplip-3.23.3/prnt/hpijs/context2.cpp.covscan hplip-3.23.3/prnt/hpijs/context2.cpp
---- hplip-3.23.3/prnt/hpijs/context2.cpp.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/prnt/hpijs/context2.cpp	2023-05-29 13:58:10.971395203 +0200
+diff -up hplip-3.26.6/prnt/hpijs/context2.cpp.covscan hplip-3.26.6/prnt/hpijs/context2.cpp
+--- hplip-3.26.6/prnt/hpijs/context2.cpp.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/prnt/hpijs/context2.cpp	2026-09-22 16:03:14.769017102 +0200
 @@ -1302,6 +1302,7 @@ DRIVER_ERROR PrintContext::SelectDevice
  	if(0 == strnlen((const char *)pSS->strDevID, DevIDBuffSize))
  	{
@@ -150,9 +150,9 @@ diff -up hplip-3.23.3/prnt/hpijs/context2.cpp.covscan hplip-3.23.3/prnt/hpijs/co
  	}
      thePrinter = pPFI->CreatePrinter (pSS, familyHandle);
      if (thePrinter->constructor_error != NO_ERROR)
-diff -up hplip-3.23.3/prnt/hpijs/systemservices.cpp.covscan hplip-3.23.3/prnt/hpijs/systemservices.cpp
---- hplip-3.23.3/prnt/hpijs/systemservices.cpp.covscan	2023-03-28 09:26:27.000000000 +0200
-+++ hplip-3.23.3/prnt/hpijs/systemservices.cpp	2023-05-29 13:58:10.971395203 +0200
+diff -up hplip-3.26.6/prnt/hpijs/systemservices.cpp.covscan hplip-3.26.6/prnt/hpijs/systemservices.cpp
+--- hplip-3.26.6/prnt/hpijs/systemservices.cpp.covscan	2026-09-11 13:22:15.000000000 +0200
++++ hplip-3.26.6/prnt/hpijs/systemservices.cpp	2026-09-22 16:03:14.769296084 +0200
 @@ -396,7 +396,10 @@ void SystemServices::AdjustIO(IO_MODE IM
      IOMode.bDevID =IM.bDevID  && IOMode.bDevID;
  
@@ -164,29 +164,10 @@ diff -up hplip-3.23.3/prnt/hpijs/systemservices.cpp.covscan hplip-3.23.3/prnt/hp
  }
  
  APDK_END_NAMESPACE
-diff -up hplip-3.23.3/prnt/hpps/hppsfilter.c.covscan hplip-3.23.3/prnt/hpps/hppsfilter.c
---- hplip-3.23.3/prnt/hpps/hppsfilter.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/prnt/hpps/hppsfilter.c	2023-05-29 13:58:10.972395197 +0200
-@@ -274,13 +274,13 @@ static void WriteHeader(char **argument)
-     /*		Writing Header Information
-     argument[1] = JOB ID , argument[2]= USERNAME,  argument[3] = TITLE		*/
-     hpwrite("\x1b%-12345X@PJL JOBNAME=", strlen("\x1b%-12345X@PJL JOBNAME="));
--    sprintf(buffer, "hplip_%s_%s\x0a", argument[2], argument[1]);
-+    snprintf(buffer, MAX_BUFFER-1, "hplip_%s_%s\x0a", argument[2], argument[1]);
-     hpwrite(buffer, strlen(buffer));
-     memset(buffer, 0, sizeof(buffer));
--    sprintf(buffer, "@PJL SET USERNAME=\"%s\"\x0a", argument[2]);
-+    snprintf(buffer, MAX_BUFFER-1, "@PJL SET USERNAME=\"%s\"\x0a", argument[2]);
-     hpwrite(buffer, strlen(buffer));
-     memset(buffer, 0, sizeof(buffer));
--    sprintf(buffer, "@PJL SET JOBNAME=\"%s\"\x0a", argument[3]);
-+    snprintf(buffer, MAX_BUFFER-1, "@PJL SET JOBNAME=\"%s\"\x0a", argument[3]);
-     hpwrite(buffer, strlen(buffer));
-     fprintf(stderr, "HP PS filter func = WriteHeader           : WRITING PJL HEADER INFO\n");
-     return;
-diff -up hplip-3.23.3/protocol/hp_ipp.h.covscan hplip-3.23.3/protocol/hp_ipp.h
---- hplip-3.23.3/protocol/hp_ipp.h.covscan	2023-05-29 13:58:10.972395197 +0200
-+++ hplip-3.23.3/protocol/hp_ipp.h	2023-05-29 13:59:03.645085468 +0200
+diff -up hplip-3.26.6/prnt/hpps/hppsfilter.c.covscan hplip-3.26.6/prnt/hpps/hppsfilter.c
+diff -up hplip-3.26.6/protocol/hp_ipp.h.covscan hplip-3.26.6/protocol/hp_ipp.h
+--- hplip-3.26.6/protocol/hp_ipp.h.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/protocol/hp_ipp.h	2026-09-22 16:03:14.769948546 +0200
 @@ -168,6 +168,11 @@ HPIPP_RESULT parseResponseHeader(char* h
  HPIPP_RESULT prepend_http_header(raw_ipp *raw_request,const char *resource);
  enum HPMUD_RESULT sendUSBRequest(char *buf, int size, raw_ipp *responseptr, char * device_uri);
@@ -199,9 +180,9 @@ diff -up hplip-3.23.3/protocol/hp_ipp.h.covscan hplip-3.23.3/protocol/hp_ipp.h
  
  ipp_t * createFaxDetailRequest(const char *printer_name);
  ipp_t * getDeviceFaxModemAttributes(char* device_uri,char* printer_name, int *count);
-diff -up hplip-3.23.3/scan/sane/bb_ledm.c.covscan hplip-3.23.3/scan/sane/bb_ledm.c
---- hplip-3.23.3/scan/sane/bb_ledm.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/bb_ledm.c	2023-05-29 13:58:10.972395197 +0200
+diff -up hplip-3.26.6/scan/sane/bb_ledm.c.covscan hplip-3.26.6/scan/sane/bb_ledm.c
+--- hplip-3.26.6/scan/sane/bb_ledm.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/bb_ledm.c	2026-09-22 16:03:14.770146116 +0200
 @@ -26,6 +26,7 @@
  # include "http.h"
  # include "xml.h"
@@ -210,9 +191,9 @@ diff -up hplip-3.23.3/scan/sane/bb_ledm.c.covscan hplip-3.23.3/scan/sane/bb_ledm
  
  # include <stdint.h>
  
-diff -up hplip-3.23.3/scan/sane/common.h.covscan hplip-3.23.3/scan/sane/common.h
---- hplip-3.23.3/scan/sane/common.h.covscan	2023-05-29 13:58:10.727396637 +0200
-+++ hplip-3.23.3/scan/sane/common.h	2023-05-29 13:58:10.972395197 +0200
+diff -up hplip-3.26.6/scan/sane/common.h.covscan hplip-3.26.6/scan/sane/common.h
+--- hplip-3.26.6/scan/sane/common.h.covscan	2026-09-22 16:03:14.600215636 +0200
++++ hplip-3.26.6/scan/sane/common.h	2026-09-22 16:03:14.770368503 +0200
 @@ -36,7 +36,7 @@
  #define _STRINGIZE(x) #x
  #define STRINGIZE(x) _STRINGIZE(x)
@@ -222,9 +203,9 @@ diff -up hplip-3.23.3/scan/sane/common.h.covscan hplip-3.23.3/scan/sane/common.h
  #define BUG_DUMP(data, size) bugdump((data), (size))
  #define BUG_SZ(args...) {syslog(LOG_ERR, args); DBG(2, args);}
  
-diff -up hplip-3.23.3/scan/sane/escl.c.covscan hplip-3.23.3/scan/sane/escl.c
---- hplip-3.23.3/scan/sane/escl.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/escl.c	2023-05-29 13:58:10.972395197 +0200
+diff -up hplip-3.26.6/scan/sane/escl.c.covscan hplip-3.26.6/scan/sane/escl.c
+--- hplip-3.26.6/scan/sane/escl.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/escl.c	2026-09-22 16:03:14.770571242 +0200
 @@ -849,7 +849,7 @@ SANE_Status escl_control_option(SANE_Han
    //DBG8("escl_control_option (option=%s) action=%d\n", ps->option[option].name, action);
    if (stat != SANE_STATUS_GOOD)
@@ -243,9 +224,9 @@ diff -up hplip-3.23.3/scan/sane/escl.c.covscan hplip-3.23.3/scan/sane/escl.c
      return;
    }
  
-diff -up hplip-3.23.3/scan/sane/http.c.covscan hplip-3.23.3/scan/sane/http.c
---- hplip-3.23.3/scan/sane/http.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/http.c	2023-05-29 13:58:10.973395191 +0200
+diff -up hplip-3.26.6/scan/sane/http.c.covscan hplip-3.26.6/scan/sane/http.c
+--- hplip-3.26.6/scan/sane/http.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/http.c	2026-09-22 16:03:14.770816752 +0200
 @@ -36,6 +36,7 @@
  #include <string.h>
  #include <syslog.h>
@@ -254,9 +235,9 @@ diff -up hplip-3.23.3/scan/sane/http.c.covscan hplip-3.23.3/scan/sane/http.c
  #include "hpmud.h"
  #include "http.h"
  
-diff -up hplip-3.23.3/scan/sane/io.c.covscan hplip-3.23.3/scan/sane/io.c
---- hplip-3.23.3/scan/sane/io.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/io.c	2023-05-29 13:58:10.973395191 +0200
+diff -up hplip-3.26.6/scan/sane/io.c.covscan hplip-3.26.6/scan/sane/io.c
+--- hplip-3.26.6/scan/sane/io.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/io.c	2026-09-22 16:03:14.771018961 +0200
 @@ -50,7 +50,7 @@ int __attribute__ ((visibility ("hidden"
      
     if (dbus_error_is_set(&dbus_err))
@@ -284,10 +265,10 @@ diff -up hplip-3.23.3/scan/sane/io.c.covscan hplip-3.23.3/scan/sane/io.c
          return 0;
      }
  
-diff -up hplip-3.23.3/scan/sane/ledm.c.covscan hplip-3.23.3/scan/sane/ledm.c
---- hplip-3.23.3/scan/sane/ledm.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/ledm.c	2023-05-29 13:58:10.973395191 +0200
-@@ -813,7 +813,7 @@ SANE_Status ledm_control_option(SANE_Han
+diff -up hplip-3.26.6/scan/sane/ledm.c.covscan hplip-3.26.6/scan/sane/ledm.c
+--- hplip-3.26.6/scan/sane/ledm.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/ledm.c	2026-09-22 16:03:14.771200160 +0200
+@@ -819,7 +819,7 @@ SANE_Status ledm_control_option(SANE_Han
  
    if (stat != SANE_STATUS_GOOD)
    {
@@ -296,7 +277,7 @@ diff -up hplip-3.23.3/scan/sane/ledm.c.covscan hplip-3.23.3/scan/sane/ledm.c
    }
  
     return stat;
-@@ -1078,7 +1078,7 @@ void ledm_close(SANE_Handle handle)
+@@ -1084,7 +1084,7 @@ void ledm_close(SANE_Handle handle)
  
    if (ps == NULL || ps != session)
    {
@@ -305,9 +286,9 @@ diff -up hplip-3.23.3/scan/sane/ledm.c.covscan hplip-3.23.3/scan/sane/ledm.c
      return;
    }
  
-diff -up hplip-3.23.3/scan/sane/marvell.c.covscan hplip-3.23.3/scan/sane/marvell.c
---- hplip-3.23.3/scan/sane/marvell.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/marvell.c	2023-05-29 13:58:10.976395173 +0200
+diff -up hplip-3.26.6/scan/sane/marvell.c.covscan hplip-3.26.6/scan/sane/marvell.c
+--- hplip-3.26.6/scan/sane/marvell.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/marvell.c	2026-09-22 16:03:14.771482018 +0200
 @@ -134,7 +134,7 @@ static int get_ip_data(struct marvell_se
  
     if (!ps->ip_handle)
@@ -362,7 +343,7 @@ diff -up hplip-3.23.3/scan/sane/marvell.c.covscan hplip-3.23.3/scan/sane/marvell
        return;
     }
  
-@@ -849,7 +849,7 @@ SANE_Status marvell_control_option(SANE_
+@@ -853,7 +853,7 @@ SANE_Status marvell_control_option(SANE_
                 stat = SANE_STATUS_GOOD;
                 break;
              }
@@ -371,7 +352,7 @@ diff -up hplip-3.23.3/scan/sane/marvell.c.covscan hplip-3.23.3/scan/sane/marvell
           }
           else
           {  /* Set default. */
-@@ -866,7 +866,7 @@ SANE_Status marvell_control_option(SANE_
+@@ -870,7 +870,7 @@ SANE_Status marvell_control_option(SANE_
  
     if (stat != SANE_STATUS_GOOD)
     {
@@ -380,7 +361,7 @@ diff -up hplip-3.23.3/scan/sane/marvell.c.covscan hplip-3.23.3/scan/sane/marvell
                    action==SANE_ACTION_GET_VALUE ? "get" : action==SANE_ACTION_SET_VALUE ? "set" : "auto");
     }
  
-@@ -905,7 +905,7 @@ SANE_Status marvell_start(SANE_Handle ha
+@@ -909,7 +909,7 @@ SANE_Status marvell_start(SANE_Handle ha
     
     if (set_extents(ps))
     {
@@ -389,7 +370,7 @@ diff -up hplip-3.23.3/scan/sane/marvell.c.covscan hplip-3.23.3/scan/sane/marvell
           ps->currentTlx, ps->currentTly, ps->currentBrx, ps->currentBry, ps->min_width, ps->min_height, ps->tlxRange.max, ps->tlyRange.max);
        stat = SANE_STATUS_INVAL;
        goto bugout;
-@@ -963,7 +963,7 @@ SANE_Status marvell_start(SANE_Handle ha
+@@ -967,7 +967,7 @@ SANE_Status marvell_start(SANE_Handle ha
     /* Open image processor. */
     if ((ret = ipOpen(pXform-xforms, xforms, 0, &ps->ip_handle)) != IP_DONE)
     {
@@ -398,7 +379,7 @@ diff -up hplip-3.23.3/scan/sane/marvell.c.covscan hplip-3.23.3/scan/sane/marvell
        stat = SANE_STATUS_INVAL;
        goto bugout;
     }
-@@ -1023,7 +1023,7 @@ SANE_Status marvell_read(SANE_Handle han
+@@ -1027,7 +1027,7 @@ SANE_Status marvell_read(SANE_Handle han
  
     if(ret & (IP_INPUT_ERROR | IP_FATAL_ERROR))
     {
@@ -407,18 +388,10 @@ diff -up hplip-3.23.3/scan/sane/marvell.c.covscan hplip-3.23.3/scan/sane/marvell
        goto bugout;
     }
  
-diff -up hplip-3.23.3/scan/sane/sclpml.c.covscan hplip-3.23.3/scan/sane/sclpml.c
---- hplip-3.23.3/scan/sane/sclpml.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/sclpml.c	2023-05-29 13:58:10.976395173 +0200
-@@ -30,6 +30,7 @@
- #include <unistd.h>
- #include <fcntl.h>
- #include <string.h>
-+#include <sys/time.h>
- #include "sane.h"
- #include "saneopts.h"
- #include "common.h"
-@@ -2090,7 +2091,7 @@ void sclpml_close(SANE_Handle handle)
+diff -up hplip-3.26.6/scan/sane/sclpml.c.covscan hplip-3.26.6/scan/sane/sclpml.c
+--- hplip-3.26.6/scan/sane/sclpml.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/sclpml.c	2026-09-22 16:03:14.771631551 +0200
+@@ -2117,7 +2117,7 @@ void sclpml_close(SANE_Handle handle)
      DBG(8, "sane_hpaio_close(): %s %d\n", __FILE__, __LINE__); 
      if (hpaio == NULL || hpaio != session)
      {
@@ -427,9 +400,9 @@ diff -up hplip-3.23.3/scan/sane/sclpml.c.covscan hplip-3.23.3/scan/sane/sclpml.c
        return;
       }
  
-diff -up hplip-3.23.3/scan/sane/soap.c.covscan hplip-3.23.3/scan/sane/soap.c
---- hplip-3.23.3/scan/sane/soap.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/soap.c	2023-05-29 13:58:10.977395167 +0200
+diff -up hplip-3.26.6/scan/sane/soap.c.covscan hplip-3.26.6/scan/sane/soap.c
+--- hplip-3.26.6/scan/sane/soap.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/soap.c	2026-09-22 16:03:14.772359141 +0200
 @@ -142,7 +142,7 @@ static int get_ip_data(struct soap_sessi
  
     if (!ps->ip_handle)
@@ -475,7 +448,7 @@ diff -up hplip-3.23.3/scan/sane/soap.c.covscan hplip-3.23.3/scan/sane/soap.c
        return;
     }
  
-@@ -824,7 +824,7 @@ SANE_Status soap_control_option(SANE_Han
+@@ -828,7 +828,7 @@ SANE_Status soap_control_option(SANE_Han
  
     if (stat != SANE_STATUS_GOOD)
     {
@@ -484,7 +457,7 @@ diff -up hplip-3.23.3/scan/sane/soap.c.covscan hplip-3.23.3/scan/sane/soap.c
                    action==SANE_ACTION_GET_VALUE ? "get" : action==SANE_ACTION_SET_VALUE ? "set" : "auto");
     }
  
-@@ -862,7 +862,7 @@ SANE_Status soap_start(SANE_Handle handl
+@@ -866,7 +866,7 @@ SANE_Status soap_start(SANE_Handle handl
     ps->user_cancel = 0;
     if (set_extents(ps))
     {
@@ -493,7 +466,7 @@ diff -up hplip-3.23.3/scan/sane/soap.c.covscan hplip-3.23.3/scan/sane/soap.c
           ps->currentTlx, ps->currentTly, ps->currentBrx, ps->currentBry, ps->min_width, ps->min_height, ps->tlxRange.max, ps->tlyRange.max);
        stat = SANE_STATUS_INVAL;
        goto bugout;
-@@ -913,7 +913,7 @@ SANE_Status soap_start(SANE_Handle handl
+@@ -917,7 +917,7 @@ SANE_Status soap_start(SANE_Handle handl
     /* Open image processor. */
     if ((ret = ipOpen(pXform-xforms, xforms, 0, &ps->ip_handle)) != IP_DONE)
     {
@@ -502,7 +475,7 @@ diff -up hplip-3.23.3/scan/sane/soap.c.covscan hplip-3.23.3/scan/sane/soap.c
        stat = SANE_STATUS_INVAL;
        goto bugout;
     }
-@@ -955,7 +955,7 @@ SANE_Status soap_start(SANE_Handle handl
+@@ -959,7 +959,7 @@ SANE_Status soap_start(SANE_Handle handl
  
           if (ret & (IP_INPUT_ERROR | IP_FATAL_ERROR | IP_DONE))
           {
@@ -511,7 +484,7 @@ diff -up hplip-3.23.3/scan/sane/soap.c.covscan hplip-3.23.3/scan/sane/soap.c
              stat = SANE_STATUS_IO_ERROR;
              goto bugout;
           }
-@@ -1007,7 +1007,7 @@ SANE_Status soap_read(SANE_Handle handle
+@@ -1011,7 +1011,7 @@ SANE_Status soap_read(SANE_Handle handle
  
     if(ret & (IP_INPUT_ERROR | IP_FATAL_ERROR))
     {
@@ -520,9 +493,9 @@ diff -up hplip-3.23.3/scan/sane/soap.c.covscan hplip-3.23.3/scan/sane/soap.c
        goto bugout;
     }
  
-diff -up hplip-3.23.3/scan/sane/soapht.c.covscan hplip-3.23.3/scan/sane/soapht.c
---- hplip-3.23.3/scan/sane/soapht.c.covscan	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/scan/sane/soapht.c	2023-05-29 13:58:10.977395167 +0200
+diff -up hplip-3.26.6/scan/sane/soapht.c.covscan hplip-3.26.6/scan/sane/soapht.c
+--- hplip-3.26.6/scan/sane/soapht.c.covscan	2026-09-11 13:22:00.000000000 +0200
++++ hplip-3.26.6/scan/sane/soapht.c	2026-09-22 16:03:14.772652079 +0200
 @@ -136,7 +136,7 @@ static int get_ip_data(struct soap_sessi
  
     if (!ps->ip_handle)
@@ -568,7 +541,7 @@ diff -up hplip-3.23.3/scan/sane/soapht.c.covscan hplip-3.23.3/scan/sane/soapht.c
        return;
     }
  
-@@ -904,7 +904,7 @@ SANE_Status soapht_control_option(SANE_H
+@@ -910,7 +910,7 @@ SANE_Status soapht_control_option(SANE_H
  
     if (stat != SANE_STATUS_GOOD)
     {
@@ -577,7 +550,7 @@ diff -up hplip-3.23.3/scan/sane/soapht.c.covscan hplip-3.23.3/scan/sane/soapht.c
                    action==SANE_ACTION_GET_VALUE ? "get" : action==SANE_ACTION_SET_VALUE ? "set" : "auto");
     }
  
-@@ -946,7 +946,7 @@ SANE_Status soapht_start(SANE_Handle han
+@@ -952,7 +952,7 @@ SANE_Status soapht_start(SANE_Handle han
    
     if (set_extents(ps))
     {
@@ -586,7 +559,7 @@ diff -up hplip-3.23.3/scan/sane/soapht.c.covscan hplip-3.23.3/scan/sane/soapht.c
           ps->currentTlx, ps->currentTly, ps->currentBrx, ps->currentBry, ps->min_width, ps->min_height, ps->tlxRange.max, ps->tlyRange.max);
        stat = SANE_STATUS_INVAL;
        goto bugout;
-@@ -1032,7 +1032,7 @@ SANE_Status soapht_start(SANE_Handle han
+@@ -1038,7 +1038,7 @@ SANE_Status soapht_start(SANE_Handle han
     /* Open image processor. */
     if ((ret = ipOpen(pXform-xforms, xforms, 0, &ps->ip_handle)) != IP_DONE)
     {
@@ -595,7 +568,7 @@ diff -up hplip-3.23.3/scan/sane/soapht.c.covscan hplip-3.23.3/scan/sane/soapht.c
        stat = SANE_STATUS_INVAL;
        goto bugout;
     }
-@@ -1075,7 +1075,7 @@ SANE_Status soapht_start(SANE_Handle han
+@@ -1081,7 +1081,7 @@ SANE_Status soapht_start(SANE_Handle han
  
           if (ret & (IP_INPUT_ERROR | IP_FATAL_ERROR | IP_DONE))
           {
@@ -604,7 +577,7 @@ diff -up hplip-3.23.3/scan/sane/soapht.c.covscan hplip-3.23.3/scan/sane/soapht.c
              stat = SANE_STATUS_IO_ERROR;
              goto bugout;
           }
-@@ -1124,7 +1124,7 @@ SANE_Status soapht_read(SANE_Handle hand
+@@ -1130,7 +1130,7 @@ SANE_Status soapht_read(SANE_Handle hand
  
     if(ret & (IP_INPUT_ERROR | IP_FATAL_ERROR))
     {

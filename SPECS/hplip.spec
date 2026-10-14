@@ -6,8 +6,8 @@
 
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
-Version: 3.23.12
-Release: 10%{?dist}.5
+Version: 3.26.6
+Release: 1%{?dist}.3
 # most files (base/*, *, ui*/...) - GPL2+
 # prnt/hpijs/ jpeg related files - IJG
 # prnt/* - BSD-3-Clause-HP - it is modified a little, asked here https://gitlab.com/fedora/legal/fedora-license-data/-/issues/267
@@ -76,6 +76,8 @@ Patch30: hplip-hpfax-importerror-print.patch
 Patch31: hplip-wifisetup.patch
 # pgp.mit.edu keyserver got bad connection, so we need to have pool of keyservers
 # to choose (Bz#1641100, launchpad#1799212)
+# F42+ update: HP has new key, and currently only on Ubuntu keyserver - so this patch now
+# only adjust terminal output, we will see if connection problems reappear
 Patch32: hplip-keyserver.patch
 # QMessagebox call was copy-pasted from Qt4 version, but Qt5 has different arguments,
 # This patch solves most of them
@@ -199,54 +201,69 @@ Patch57: hplip-plugin-udevissues.patch
 #   removed
 # - /lib64/libm.so is not symlink but ld script, which cannot be used in dlopen()
 Patch58: hplip-no-libhpmud-libm-warnings.patch
-Patch60: hplip-plugin-script.patch
+Patch59: hplip-plugin-script.patch
 # C99 compatibility fixes by fweimer - use explicit int
 # Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
-Patch61: hplip-pserror-c99.patch
+Patch60: hplip-pserror-c99.patch
 # C99 compatibility patch by fweimer - several undefined functions in hpaio
 # backend are declared in orblite.h
 # Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
-Patch62: hplip-scan-hpaio-include.patch
+Patch61: hplip-scan-hpaio-include.patch
 # C99 compatibility patch by fweimer - undefined _DBG() and dynamic linking funcs in orblite.c
 # - _DBG() looks like typo and new header is added for funcs
 # Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
-Patch63: hplip-scan-orblite-c99.patch
+Patch62: hplip-scan-orblite-c99.patch
 # C99 compatibility patch by fweimer:
 # PyString_AsStringAndSize is removed in Python3, remove its compilation for now
 # in case there is a request for compiling it again, there is a possible solution
 # for the function py3 alternative https://opendev.org/openstack/pyeclib/commit/19c8313986
 # - disabling removes hp-unload and /usr/share/hplip/pcard as well
 # Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
-Patch64: hplip-pcardext-disable.patch
+Patch63: hplip-pcardext-disable.patch
 # undefined strcasestr() in sclpml.c - build with _GNU_SOURCE
 # Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
-Patch65: hplip-sclpml-strcasestr.patch
+Patch64: hplip-sclpml-strcasestr.patch
 # 2192131 - parseQueues() doesn't get device uri from 'lpstat -v', because parsing pattern changed
 # https://bugs.launchpad.net/hplip/+bug/2027972
-Patch67: hplip-fix-parsing-lpstat.patch
+Patch65: hplip-fix-parsing-lpstat.patch
 # switch to curl by downstream patch from wget to workaround openstack dropping IPv6
 # which causes great delays...
 # Remove this once internal openstack handles IPv6 better - test by pinging IPv6 in OpenStack,
 # it should not hang.
-Patch68: hplip-plugin-curl.patch
-# 2221311 - [python3.12] hplip tools/binaries crash due depending on removed configparser.readfp()
-# Upstream https://bugs.launchpad.net/hplip/+bug/2028001
-Patch69: hplip-no-readfp.patch
+Patch66: hplip-plugin-curl.patch
 # fix SyntaxWarning from python3.12
 # https://bugs.launchpad.net/hplip/+bug/2029480
-Patch70: hplip-use-raw-strings.patch
+Patch67: hplip-use-raw-strings.patch
 # FTBFS GCC 14
 # https://bugs.launchpad.net/hplip/+bug/2048780
-Patch71: hplip-hpaio-gcc14.patch
-# CVE-2026-8632 - Privilege escalation and arbitrary code execution
-# via operating system command injection in Is_Process_Running()
-# https://redhat.atlassian.net/browse/RHEL-178352
-Patch72: hplip-CVE-2026-8632.patch
-# CVE-2026-8631 hplip: HPLIP: Arbitrary code execution and privilege escalation via integer overflow in hpcups
-# https://redhat.atlassian.net/browse/RHEL-178715
-Patch73: hplip-hpcups-integer-overflow.patch
-# OSH fixes after CVE-2026-8631
-Patch74: hplip-CVE-2026-8631-osh.patch
+Patch68: hplip-hpaio-gcc14.patch
+# function prototype did not specify argument's data types
+# https://bugs.launchpad.net/hplip/+bug/2096650
+Patch69: hplip-gcc15-stdc23.patch
+# status history table shows unformatted QDateTime values
+# https://bugs.launchpad.net/hplip/+bug/1956547
+Patch70: hplip-format-qdatetime.patch
+# Python 3.14 removed urlopener
+# https://bugs.launchpad.net/hplip/+bug/2115046
+# hp-scan command failed to run and gives an error (fedora#2395809)
+# https://bugs.launchpad.net/hplip/+bug/2124268
+Patch72: hplip-scan-size.patch
+# 3.25.8 brings new implementation for calling commands in subprocess,
+# but again directs I/O into pipes, which does not work for TUI plugin
+# installation. Additionally it tracebacks if stdout/stderr is None
+# https://bugs.launchpad.net/hplip/+bug/2110101
+Patch73: hplip-plugin-stdout.patch
+# Fallbacking to HP site for plugin does not work for several reasons:
+# - curl was not called with -f, so error 404 from openprinting did not propagated,
+# - HP fallback URL in hplip does not contain latest changes - it now has YYYY-MM in it,
+# - connecting to HP site requires curl/wget to set user-agent to pretend to be a browser
+# https://bugs.launchpad.net/hplip/+bug/2154206
+Patch74: hplip-curl-fallback.patch
+# OSH fixes for 3.26.6
+Patch75: hplip-osh-fixes-3.26.6.patch
+# scanning via LEDM fails due duplicated buffer length increment
+# https://bugs.launchpad.net/hplip/+bug/2169330
+Patch76: hplip-scan-exceed-buf.patch
 
 %if 0%{?fedora} || 0%{?rhel} <= 8
 # mention hplip-gui if you want to have GUI
@@ -299,6 +316,9 @@ BuildRequires: sane-backends-devel
 # macros: %%{_tmpfilesdir}, %%{_udevrulesdir}
 BuildRequires: systemd
 
+%if 0%{?fedora} || 0%{?rhel} <= 8
+Suggests: hplip-gui
+%endif
 # uses avahi-browse for discovering IPP-over-USB printers
 Recommends: avahi-tools
 # 1733449 - Scanner on an HP AIO printer is not detected unless libsane-hpaio is installed
@@ -312,8 +332,6 @@ Requires: cups
 # switch to curl by downstream patch from wget to workaround openstack dropping IPv6
 # which causes great delays...
 Requires: curl
-# for bash script acting as hp-plugin (Source7)
-Requires: gawk
 # set require directly to /usr/bin/gpg, because gnupg2 and gnupg ships it,
 # but gnupg will be deprecated in the future
 Requires: %{_bindir}/gpg
@@ -322,6 +340,8 @@ Requires: python3-dbus
 %if 0%{?rhel} <= 8 || 0%{?fedora}
 Requires: python3-pillow
 %endif
+# user+group lp
+Requires: setup
 # /usr/lib/udev/rules.d
 Requires: systemd
 # 1788643 - Fedora minimal does not ship tar by default
@@ -568,44 +588,50 @@ done
 %patch -P 57 -p1 -b .hpplugin-udevperms
 # 2080235 - Misleading errors about missing shared libraries when scanning
 %patch -P 58 -p1 -b .no-libm-libhpmud-warn
-%patch -P 60 -p1 -b .plugin-patch
+%patch -P 59 -p1 -b .plugin-patch
 # C99 compatibility fixes by fweimer - use explicit int
 # Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
-%patch -P 61 -p1 -b .pserror-int
+%patch -P 60 -p1 -b .pserror-int
 # C99 compatibility patch by fweimer - several undefined functions in hpaio
 # backend are declared in orblite.h
 # Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
-%patch -P 62 -p1 -b .hpaio-orblite-defs
+%patch -P 61 -p1 -b .hpaio-orblite-defs
 # C99 compatibility patch by fweimer - undefined _DBG() and dynamic linking funcs in orblite.c
 # - _DBG() looks like typo and new header is added for funcs
 # Submitted upstream: <https://bugs.launchpad.net/hplip/+bug/1997875>
-%patch -P 63 -p1 -b .orblite-undefs
+%patch -P 62 -p1 -b .orblite-undefs
 # C99 compatibility patch by fweimer - python2 PyString_AsStringAndSize in python3 code
 # gives undefined reference - removed for now with dependent hp-unload
-%patch -P 64 -p1 -b .pcardext-disable
+%patch -P 63 -p1 -b .pcardext-disable
 # C99 compatibility patch by fweimer - undefined strcasestr() in sclpml.c - build with _GNU_SOURCE
-%patch -P 65 -p1 -b .sclpml-strcasestr
+%patch -P 64 -p1 -b .sclpml-strcasestr
 # 2192131 - parseQueues() doesn't get device uri from 'lpstat -v', because parsing pattern changed
 # https://bugs.launchpad.net/hplip/+bug/2027972
-%patch -P 67 -p1 -b .lpstat-parse
+%patch -P 65 -p1 -b .lpstat-parse
 # switch to curl by downstream patch from wget to workaround openstack dropping IPv6
 # which causes great delays...
-%patch -P 68 -p1 -b .curl-switch
-# 2221311 - [python3.12] hplip tools/binaries crash due depending on removed configparser.readfp()
-# Upstream https://bugs.launchpad.net/hplip/+bug/2028001
-%patch -P 69 -p1 -b .no-readfp
+%patch -P 66 -p1 -b .curl-switch
 # fix warnings
 # upstream https://bugs.launchpad.net/hplip/+bug/2029480
-%patch -P 70 -p1 -b .raw-strings
+%patch -P 67 -p1 -b .raw-strings
 # FTBFS GCC 14
 # https://bugs.launchpad.net/hplip/+bug/2048780
-%patch -P 71 -p1 -b .hpaio-gcc14
-# CVE-2026-8632 - command injection in Is_Process_Running()
-%patch -P 72 -p1 -b .CVE-2026-8632
-# CVE-2026-8631 - integer overflow in hpcups
-%patch -P 73 -p1 -b .hpcups-integer-overflow
-# OSH fixes after CVE-2026-8631
-%patch -P 74 -p1 -b .cve-2026-8631-osh
+%patch -P 68 -p1 -b .hpaio-gcc14
+# https://bugs.launchpad.net/hplip/+bug/2096650
+%patch -P 69 -p1 -b .gcc-strc23
+# https://bugs.launchpad.net/hplip/+bug/1956547
+%patch -P 70 -p1 -b .format-qdatetime
+# https://bugs.launchpad.net/hplip/+bug/2115046
+# https://bugs.launchpad.net/hplip/+bug/2124268
+%patch -P 72 -p1 -b .scan-size
+# https://bugs.launchpad.net/hplip/+bug/2110101
+%patch -P 73 -p1 -b .plugin-stdout
+# https://bugs.launchpad.net/hplip/+bug/2154206
+%patch -P 74 -p1 -b .curl-fallback
+# fix several important OSH issues
+%patch -P 75 -p1 -b .osh-3.26.6
+# https://bugs.launchpad.net/hplip/+bug/2169330
+%patch -P 76 -p1 -b .scan-exceed-buf
 
 # Fedora specific patches now, don't put a generic patches under it
 %if 0%{?fedora} || 0%{?rhel} <= 8
@@ -671,6 +697,7 @@ cat > %{buildroot}%{_tmpfilesdir}/hplip.conf <<EOF
 # See tmpfiles.d(5) for details
 
 d /run/hplip 0775 root lp -
+d /var/lib/hp 0755 root root -
 EOF
 
 
@@ -977,6 +1004,21 @@ find doc/images -type f -exec chmod 644 {} \;
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Mon Oct 12 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.26.6-1.3
+- fix LEDM scanner regression
+
+* Thu Oct 08 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.26.6-1.2
+- fix OSH issues
+
+* Wed Sep 30 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.26.6-1.1
+- Create right dir
+
+* Tue Sep 29 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.26.6-1
+- RHEL-266547 [IMAGE-MODE] missing /var/lib/hp on image-mode
+
+* Wed Sep 23 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.26.6-1
+- Rebase to 3.26.6
+
 * Fri Jul 03 2026 Zdenek Dohnal <zdohnal@redhat.com> - 3.23.12-10.5
 - RHEL-192007 CVE-2026-14544 hplip: Incomplete Fix for CVE-2026-8631
 

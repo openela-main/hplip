@@ -1,20 +1,7 @@
-diff -up hplip-3.23.3/setup.py.add-ppd-crash hplip-3.23.3/setup.py
---- hplip-3.23.3/setup.py.add-ppd-crash	2023-03-28 09:26:11.000000000 +0200
-+++ hplip-3.23.3/setup.py	2023-05-29 13:55:03.443497903 +0200
-@@ -553,6 +553,9 @@ else: # INTERACTIVE_MODE
- 
-                             if file_path.endswith('.gz'):
-                                 nickname = gzip.GzipFile(file_path, 'r').read(4096)
-+                                if sys.version_info[0] > 2:
-+                                    nickname = nickname.decode('utf-8')
-+
-                             else:
-                                 nickname = open(file_path, 'r').read(4096)
- 
-diff -up hplip-3.23.3/ui5/setupdialog.py.add-ppd-crash hplip-3.23.3/ui5/setupdialog.py
---- hplip-3.23.3/ui5/setupdialog.py.add-ppd-crash	2023-05-29 13:55:03.443497903 +0200
-+++ hplip-3.23.3/ui5/setupdialog.py	2023-05-29 13:57:19.014700721 +0200
-@@ -765,10 +765,9 @@ class SetupDialog(QDialog, Ui_Dialog):
+diff -up hplip-3.26.6/ui5/setupdialog.py.add-ppd-crash hplip-3.26.6/ui5/setupdialog.py
+--- hplip-3.26.6/ui5/setupdialog.py.add-ppd-crash	2026-09-22 15:44:33.786000592 +0200
++++ hplip-3.26.6/ui5/setupdialog.py	2026-09-22 15:47:18.858699815 +0200
+@@ -767,10 +767,9 @@ class SetupDialog(QDialog, Ui_Dialog):
                  pass
  
      def OtherPPDButton_clicked(self, b):
@@ -26,5 +13,5 @@ diff -up hplip-3.23.3/ui5/setupdialog.py.add-ppd-crash hplip-3.23.3/ui5/setupdia
 +                                                sys_conf.get('dirs', 'ppd'),
 +                                                self.__tr("PPD Files (*.ppd *.ppd.gz);;All Files (*)"))[0]
  
-         if ppd_file and os.path.exists(ppd_file):
-             self.print_ppd = (ppd_file, cups.getPPDDescription(ppd_file))
+         if ppd_file:
+             is_valid, validation_err = utils.validate_alternative_ppd(ppd_file, sys_conf.get('dirs', 'ppd'))

@@ -1,12 +1,13 @@
-diff --git a/installer/pluginhandler.py b/installer/pluginhandler.py
-index 1af8d85..5c498ab 100755
---- a/installer/pluginhandler.py
-+++ b/installer/pluginhandler.py
-@@ -403,7 +403,20 @@ class PluginHandle(object):
+diff -up hplip-3.26.6/installer/pluginhandler.py.hpplugin-udevperms hplip-3.26.6/installer/pluginhandler.py
+--- hplip-3.26.6/installer/pluginhandler.py.hpplugin-udevperms	2026-09-22 16:08:54.950927474 +0200
++++ hplip-3.26.6/installer/pluginhandler.py	2026-09-22 16:23:46.759730552 +0200
+@@ -462,9 +462,22 @@ class PluginHandle(object):
                      log.error("Target file %s does not exist. File copy failed." % trg)
                      continue
                  else:
--                    os.chmod(trg, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+-                    # Make plugin .so files readable/executable by all users
+-                    os.chmod(trg, 0o755)
+-                    log.debug("Set plugin file to 0o755: %s" % trg)
 +                    if trg == '/etc/udev/rules.d/S99-2000S1.rules' or \
 +                       trg == '/etc/udev/rules.d/40-libsane.rules':
 +                        os.chmod(trg, 0o644)
@@ -20,7 +21,9 @@ index 1af8d85..5c498ab 100755
 +                            udev_f.write(content)
 +
 +                    else:
-+                        os.chmod(trg, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
++                        # Make plugin .so files readable/executable by all users
++                        os.chmod(trg, 0o755)
++                        log.debug("Set plugin file to 0o755: %s" % trg)
  
                  if link:
                      if os.path.exists(link):
